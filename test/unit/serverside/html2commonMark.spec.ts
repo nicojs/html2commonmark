@@ -12,7 +12,7 @@ let assertEqual = (astExpected, astActual) => {
 	let expectedWalker = astExpected.walker();
 	let actualWalker = astExpected.walker();
 	let expectedValue;
-	while(expectedValue = expectedWalker.next()){
+	while (expectedValue = expectedWalker.next()) {
 		let actualValue = actualWalker.walk();
 		expect(actualValue).to.be.ok;
 		expect(actualValue.entering).to.be.equal(expectedValue.entering);
@@ -20,11 +20,18 @@ let assertEqual = (astExpected, astActual) => {
 	}
 }
 
-describe('Common mark 2 html', () => {
+describe('CommonMark => html', () => {
 
 	tests.filter(t => t.example <= 1).forEach(test => {
 		it.only(`test #${test.example}, section ${test.section}: "${test.html}"`, (done) => {
-			assertEqual(parser.parse(test.markdown), sut.parse(test.html));
+			sut.parse(test.html).then(result => {
+				try {
+					assertEqual(parser.parse(test.markdown), result);
+					done();
+				} catch (error) {
+					done(error);
+				}
+			}, done);
 		});
 	});
 });

@@ -16,10 +16,18 @@ var assertEqual = function (astExpected, astActual) {
         expect(actualValue.node.type).to.be.equal(expectedValue.node.type);
     }
 };
-describe('Common mark 2 html', function () {
+describe('CommonMark => html', function () {
     tests.filter(function (t) { return t.example <= 1; }).forEach(function (test) {
         it.only("test #" + test.example + ", section " + test.section + ": \"" + test.html + "\"", function (done) {
-            assertEqual(parser.parse(test.markdown), sut.parse(test.html));
+            sut.parse(test.html).then(function (result) {
+                try {
+                    assertEqual(parser.parse(test.markdown), result);
+                    done();
+                }
+                catch (error) {
+                    done(error);
+                }
+            }, done);
         });
     });
 });

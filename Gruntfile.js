@@ -11,7 +11,7 @@ module.exports = function (grunt) {
 			},
 			src: {
 				files: ['src/**/*.ts'],
-				tasks: ['ts:src']
+				tasks: ['ts:src', 'mochaTest']
 			}
 		},
 		
