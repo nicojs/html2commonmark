@@ -31,7 +31,7 @@ export = class Parser {
 		let step: WalkingStep;
 		let sibling: commonmark.Node, current: commonmark.Node, parent: commonmark.Node, root: commonmark.Node;
 		while (step = walker.next()) {
-			console.log(`Current step: ${step.isEntering ? 'entering' : 'leaving'} ${step.node.nodeName} (${step.node.nodeType})`)
+			// console.log(`Current step: ${step.isEntering ? 'entering' : 'leaving'} ${step.node.nodeName} (${step.node.nodeType})`)
 			if (step.isEntering) {
 				let next = nodeConverter.convert(step.node);
 				if (next) {

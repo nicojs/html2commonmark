@@ -12,11 +12,17 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 	let expectedWalker = astExpected.walker();
 	let actualWalker = astActual.walker();
 	let expectedValue: commonmark.WalkingStep;
+	
+	
 	while (expectedValue = expectedWalker.next()) {
-		let actualValue = actualWalker.next();
-		console.log(`verifying expected: ${expectedValue.node.type} is ${actualValue.node.type }`);
+		var actualValue = actualWalker.next();
+		// console.log(`verifying expected: ${expectedValue.node.type}/${expectedValue.node.literal} is ${actualValue.node.type }/${actualValue.node.literal}`);
 		expect(actualValue).to.be.ok;
-		expect(actualValue.node.type).to.be.equal(expectedValue.node.type);
+		['type', 'literal', 'info', 'level', 'title'].forEach
+			(property => expect(actualValue.node[property]).to.be.equal(expectedValue.node[property]));
+		if(expectedValue.node.type === 'list'){
+			['listTight', 'listTight', 'listStart', 'listDilimiter'].forEach( prop => expect(actualValue.node[prop]).to.be.equal(expectedValue.node[prop]));
+		}
 		expect(actualValue.entering).to.be.equal(expectedValue.entering);
 	}
 }
