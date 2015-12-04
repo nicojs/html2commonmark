@@ -5,9 +5,9 @@
 			"name": "Run mocha",
 			"type": "node",
 			"request": "launch",
-			"program": "node_modules/mocha/bin/_mocha",
+			"program": "node_modules/grunt-cli/bin/grunt",
 			"stopOnEntry": false,
-			"args": [".tmp/test/unit/serverside/html2commonmark.spec.js"],
+			"args": ["mochaTest"],
 			"cwd": ".",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
