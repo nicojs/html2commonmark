@@ -5,13 +5,9 @@ module.exports = function (grunt) {
 
 	grunt.initConfig({
 		watch: {
-			mocha: {
-				files: ['test/unit/serverside/**/*.ts'],
-				tasks: ['ts:mocha', 'mochaTest']
-			},
 			src: {
-				files: ['src/**/*.ts'],
-				tasks: ['ts:src', 'mochaTest']
+				files: ['**/*.ts'],
+				tasks: ['ts', 'mochaTest']
 			}
 		},
 		
