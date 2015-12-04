@@ -5,10 +5,10 @@
         "noImplicitAny": false,
         "moduleResolution": "node",
         "rootDir": ".",
-        "sourceMap": false
+        "sourceMap": true,
+        "outDir": ".tmp"
     },
     "exclude": [
-        "node_modules",
-        "typings"
+        "node_modules"
     ]
 }

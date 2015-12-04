@@ -17,11 +17,8 @@ module.exports = function (grunt) {
 		
 		// TypeScript compilation
 		ts: {
-			mocha:{
-				tsconfig: 'test/unit/serverside/tsconfig.json'
-			},
 			src: {
-				tsconfig: 'src/tsconfig.json'
+				tsconfig: 'tsconfig.json'
 			}
 		},
 
@@ -31,7 +28,7 @@ module.exports = function (grunt) {
 				timeout: 10000
 			},
 			unit: {
-				src: ['test/unit/serverside/**/*.js']
+				src: ['.tmp/test/unit/serverside/**/*.js']
 			}
 		}
 	});
