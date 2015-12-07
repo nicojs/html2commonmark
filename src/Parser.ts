@@ -22,49 +22,44 @@ export = class Parser {
 				deferred.resolve(window.document.body);
 			}
 		});
-		return p.then(this.parseDomNode, deferred.error);
+		return p.then(node => this.parseDomNode(node), deferred.error);
 	}
 
 	parseDomNode(htmlNode: Node): commonmark.Node {
+		let skippedDomNodes: Array<Node> = [];
 		let walker = new DomWalker(htmlNode);
-		let nodeConverter = new NodeConverter();
 		let step: WalkingStep;
-		let sibling: commonmark.Node, current: commonmark.Node, parent: commonmark.Node, root: commonmark.Node;
+		let current: commonmark.Node, parent: commonmark.Node;
 		while (step = walker.next()) {
-			// console.log(`Current step: ${step.isEntering ? 'entering' : 'leaving'} ${step.node.nodeName} (${step.node.nodeType})`)
+			console.log(`Current step: ${step.isEntering ? 'entering' : 'leaving'} ${step.domNode.nodeName} (${step.domNode.nodeType})`)
 			if (step.isEntering) {
-				let next = nodeConverter.convert(step.node);
+				let next = NodeConverter.convert(step.domNode);
 				if (next) {
 					current = next.node;
-					if(!root){
-						root = current;
-					}
 					if (current) {
-						if (sibling) {
-							current.insertAfter(sibling);
-						} else if (parent) {
+						if (parent) {
 							parent.appendChild(current);
-						} 
-						// else {
-						// 	// Root node
-						// 	parent = current.node;
-						// }
+						}
 						// Progress to next node
 						parent = current;
-						sibling = null;
 					} else {
-						parent.literal = next.content;
+						parent.literal = next.textContent;
+						skippedDomNodes.push(step.domNode);
 					}
+				} else {
+					console.log(`skipped ${step.domNode.nodeName}, data: "${step.domNode['data']}"`);
+					skippedDomNodes.push(step.domNode);
 				}
-			} else if (parent) {
+			} else {
 				// exiting
-				parent = parent.parent;
-				sibling = parent;
+				if (skippedDomNodes.indexOf(step.domNode) < 0) {
+					current = parent;
+					parent = current.parent;
+				}
 			}
 		}
-		console.log(`returning: ${root.type}`);
 
-		return root;
+		return current;
 	}
 
 

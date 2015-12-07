@@ -1,7 +1,7 @@
 import jsdom = require('jsdom');
 import * as commonmark from 'commonmark';
 
-export = class DomWalker {
+class DomWalker {
     current: Node;
     root: Node;
     isEntering: boolean;
@@ -27,7 +27,7 @@ export = class DomWalker {
         }
         this.moveNext(current, isEntering);
                 
-        return { isEntering: isEntering, node: current };
+        return { isEntering: isEntering, domNode: current };
     }
     
     private moveNext(previous: Node, wasEntering: boolean){
@@ -54,3 +54,4 @@ export = class DomWalker {
         this.isEntering = !!isEntering;
     }
 }
+export = DomWalker;

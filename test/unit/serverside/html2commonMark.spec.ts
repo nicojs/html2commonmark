@@ -12,16 +12,16 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 	let expectedWalker = astExpected.walker();
 	let actualWalker = astActual.walker();
 	let expectedValue: commonmark.WalkingStep;
-	
-	
+
+
 	while (expectedValue = expectedWalker.next()) {
 		var actualValue = actualWalker.next();
-		// console.log(`verifying expected: ${expectedValue.node.type}/${expectedValue.node.literal} is ${actualValue.node.type }/${actualValue.node.literal}`);
+		console.log(`verifying that: ${actualValue.node.type }/${actualValue.node.literal} is ${expectedValue.node.type}/${expectedValue.node.literal}`);
 		expect(actualValue).to.be.ok;
 		['type', 'literal', 'info', 'level', 'title'].forEach
-			(property => expect(actualValue.node[property]).to.be.equal(expectedValue.node[property]));
-		if(expectedValue.node.type === 'list'){
-			['listTight', 'listTight', 'listStart', 'listDilimiter'].forEach( prop => expect(actualValue.node[prop]).to.be.equal(expectedValue.node[prop]));
+			(prop => expect(actualValue.node[prop], `comparing ${prop} of ${expectedValue.node.type} ${actualValue.node.type}`).to.be.equal(expectedValue.node[prop]));
+		if (expectedValue.node.type === 'list') {
+			['listTight', 'listTight', 'listStart', 'listDilimiter'].forEach(prop => expect(actualValue.node[prop]).to.be.equal(expectedValue.node[prop]));
 		}
 		expect(actualValue.entering).to.be.equal(expectedValue.entering);
 	}
@@ -29,8 +29,9 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 
 describe('CommonMark => html', () => {
 
-	tests.filter(t => t.example <= 1).forEach(test => {
-		it.only(`test #${test.example}, section ${test.section}: "${test.html}"`, (done) => {
+	var scoped = [1, 2, 3, 4, 10];
+	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
+		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {
 				try {
 					assertEqual(parser.parse(test.markdown), result);

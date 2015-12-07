@@ -1,9 +1,9 @@
 interface WalkingStep {
-    node: Node;
+    domNode: Node;
     isEntering: boolean;
 }
 
 interface NodeConversion{
     node?: commonmark.Node;
-    content?: string;
+    textContent?: string;
 }
