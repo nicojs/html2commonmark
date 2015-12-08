@@ -23,6 +23,8 @@ export = class NodeConverter {
 				return { node: new commonmark.Node('Paragraph') };
 			case '#text':
 				return this.convertText(node);
+			case 'blockquote':
+				return { node: new commonmark.Node('BlockQuote') };
 			default:
 				console.log(`Missing covertion for ${nodeName}.`)
 				return { node: new commonmark.Node('Paragraph') };
