@@ -1,7 +1,5 @@
 import commonmark = require('commonmark');
 
-
-
 export = class NodeConverter {
 
 	static convert(node: Node): NodeConversion {
@@ -10,25 +8,31 @@ export = class NodeConverter {
 		console.log(`converting ${nodeName}`);
 		switch (nodeName) {
 			case 'body':
-				return { node: new commonmark.Node('Document') };
+				return this.createConversion('Document');
 			case 'pre':
-				return { node: new commonmark.Node('CodeBlock') };
+				return this.createConversion('CodeBlock');
 			case 'code':
 				return null;
 			case 'ul':
-				return { node: new commonmark.Node('List') };
+				return this.createConversion('List');
 			case 'li':
-				return { node: new commonmark.Node('Item') };
+				return this.createConversion('Item');
 			case 'p':
-				return { node: new commonmark.Node('Paragraph') };
+				return this.createConversion('Paragraph');
+			case 'hr':
+				return this.createConversion('HorizontalRule');
 			case '#text':
 				return this.convertText(node);
 			case 'blockquote':
-				return { node: new commonmark.Node('BlockQuote') };
+				return this.createConversion('BlockQuote');
 			default:
 				console.log(`Missing covertion for ${nodeName}.`)
-				return { node: new commonmark.Node('Paragraph') };
+				return this.createConversion('Paragraph');
 		}
+	}
+	
+	private static createConversion(nodeName: string): NodeConversion{
+		return { node: new commonmark.Node(nodeName) };
 	}
 
 	private static convertText(htmlNode: Node): NodeConversion {
