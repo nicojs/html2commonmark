@@ -1,8 +1,10 @@
 import commonmark = require('commonmark');
 
 export = class NodeConverter {
+	
+	private static TYPES_WITH_MANDATORY_BLOCKED_CONTENT = ['Item', 'BlockQuote'];
 
-	static convert(node: Node): NodeConversion {
+	static convert(node: Node, container: commonmark.Node): NodeConversion {
 		let conversion: NodeConversion;
 		let nodeName = node.nodeName.toLowerCase();
 		console.log(`converting ${nodeName}`);
@@ -22,7 +24,7 @@ export = class NodeConverter {
 			case 'hr':
 				return this.createConversion('HorizontalRule');
 			case '#text':
-				return this.convertText(node);
+				return this.convertText(node, container);
 			case 'blockquote':
 				return this.createConversion('BlockQuote');
 			default:
@@ -30,19 +32,33 @@ export = class NodeConverter {
 				return this.createConversion('Paragraph');
 		}
 	}
-	
-	private static createConversion(nodeName: string): NodeConversion{
+
+	private static createConversion(nodeName: string): NodeConversion {
 		return { node: new commonmark.Node(nodeName) };
 	}
 
-	private static convertText(htmlNode: Node): NodeConversion {
+	private static convertText(htmlNode: Node, container: commonmark.Node): NodeConversion {
 		if (this.hasParent(htmlNode, 'pre')) {
 			return { textContent: htmlNode.textContent };
 		} else if (htmlNode.textContent.trim()) {
 			let node = new commonmark.Node('Text');
 			node.literal = htmlNode.textContent;
-			return { node };
+			return { node: this.wrapInBlockIfNeeded(node, container) };
 		}
+	}
+
+	private static wrapInBlockIfNeeded(node: commonmark.Node, container: commonmark.Node): commonmark.Node {
+		if (this.allowsInlineContent(container)) {
+			return node;
+		} else {
+			let paragraph = new commonmark.Node('Paragraph');
+			paragraph.appendChild(node);
+			return paragraph;
+		}
+	}
+	
+	private static allowsInlineContent(node: commonmark.Node) {
+		return !node || this.TYPES_WITH_MANDATORY_BLOCKED_CONTENT.indexOf(node.type) < 0;
 	}
 
 	private static convertList(htmlNode: Node): NodeConversion {
