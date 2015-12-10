@@ -35,17 +35,14 @@ export = class Parser {
 			if (step.isEntering) {
 				let next = NodeConverter.convert(step.domNode, parent);
 				if (next) {
-					current = next.node;
+					current = next;
 					if (current) {
 						if (parent) {
 							parent.appendChild(current);
 						}
 						// Progress to next node
 						parent = current;
-					} else {
-						parent.literal = next.textContent;
-						skippedDomNodes.push(step.domNode);
-					}
+					} 
 				} else {
 					console.log(`skipped ${step.domNode.nodeName}, data: "${step.domNode['data']}"`);
 					skippedDomNodes.push(step.domNode);

@@ -24,7 +24,6 @@ function normalizeTree(root: commonmark.Node) {
 			walker.resumeAt(newNode);
 		}
 	}
-	// console.log('normalized: ', new commonmark['XmlRenderer']().render(root));
 	return root;
 }
 
@@ -33,6 +32,8 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 	let actualWalker = astActual.walker();
 	let expectedValue: commonmark.WalkingStep;
 
+	// console.log('expected: ', new commonmark['XmlRenderer']().render(astExpected));
+	// console.log('actual: ', new commonmark['XmlRenderer']().render(astActual));
 	while (expectedValue = expectedWalker.next()) {
 		var actualValue = actualWalker.next();
 		console.log(`verifying that: ${actualValue.node.type }/${actualValue.node.literal} is ${expectedValue.node.type}/${expectedValue.node.literal}`);
@@ -47,9 +48,15 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 }
 
 describe('CommonMark => html', () => {
-	// Var excluded: 7, 11
-	var scoped = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13];
-	// var scoped = [11];
+	var excluded = [11, 14, 21, 24, 27];
+	var scoped: Array<number> = [];
+	for (var i = 1; i < 30; i++) {
+		if (excluded.indexOf(i) < 0) {
+			scoped.push(i);
+		}
+	}
+	// var scoped = [21, 24, 27];
+	// scoped = [11];
 	
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
