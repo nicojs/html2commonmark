@@ -31,7 +31,7 @@ declare module commonmark {
         destination: any;
         title: string;
         info: any;
-        level: any;
+        level: number;
         listType: any;
         listTight: any;
         listStart: any;

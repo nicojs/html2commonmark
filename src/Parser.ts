@@ -37,9 +37,6 @@ export = class Parser {
 				if (next) {
 					current = next;
 					if (current) {
-						if (parent) {
-							parent.appendChild(current);
-						}
 						// Progress to next node
 						parent = current;
 					} 
