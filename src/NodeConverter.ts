@@ -4,6 +4,7 @@ export = class NodeConverter {
 
 	private static TYPES_WITH_MANDATORY_BLOCKED_CONTENT = ['Item', 'BlockQuote'];
 	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u'];
+	private static SOFTBREAK_SUBSTITUTION_CHARACTER = '\n';
 
 	static convert(node: Node, container: commonmark.Node): commonmark.Node {
 		let nodeName = node.nodeName.toLowerCase();
@@ -16,7 +17,8 @@ export = class NodeConverter {
 			case 'code':
 				return null;
 			case 'ul':
-				return this.createNode('List', container);
+			case 'ol':
+				return this.createListNode(node, container);
 			case 'li':
 				return this.createNode('Item', container);
 			case 'p':
@@ -46,6 +48,25 @@ export = class NodeConverter {
 		return node;
 	}
 
+	private static createListNode(domNode: Node, container: commonmark.Node) {
+		let list = this.createNode('List', container);
+		list._listData = {};
+		let start = domNode.attributes.getNamedItem('start');
+		switch (domNode.nodeName.toLowerCase()) {
+			case 'ul':
+				list.listType = 'bullet';
+				break;
+			case 'ol':
+				list.listType = 'ordered';
+				if(start === null){
+					list.listStart = null;
+				}else{
+					list.listStart = start;
+				}
+		}
+		return list;
+	}
+
 	private static createHeaderNode(level: number, container: commonmark.Node) {
 		let header = this.createNode('Header', container);
 		header.level = level;
@@ -59,7 +80,7 @@ export = class NodeConverter {
 			return null;
 		} else if (textContent) {
 			let nodes: Array<commonmark.Node> = [];
-			var lines = textContent.split('\n');
+			var lines = textContent.split(this.SOFTBREAK_SUBSTITUTION_CHARACTER);
 			lines.forEach((line, index) => {
 				let node = new commonmark.Node('Text');
 				node.literal = line;
@@ -86,7 +107,7 @@ export = class NodeConverter {
 	}
 
 	private static trimLeft(text: string) {
-		while ( text.charAt(0).match(/\s/)) {
+		while (text.charAt(0).match(/\s/)) {
 			text = text.substr(1);
 		}
 		return text;

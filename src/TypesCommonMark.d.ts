@@ -16,6 +16,13 @@ declare module commonmark {
 
     export interface Position extends Array<Array<number>> {
     }
+    
+    export interface ListData{
+        type?: string,
+        tight?: boolean,
+        delimiter?: string,
+        bulletChar?: string
+    }
 
     export class Node {
         constructor(nodeType: string, sourcepos?: Position);
@@ -42,6 +49,7 @@ declare module commonmark {
         insertAfter(sibling: Node): void;
         insertBefore(sibling: Node): void;
         walker(): NodeWalker;
+        _listData: ListData;
     }
 
     export class Parser {

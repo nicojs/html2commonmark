@@ -50,12 +50,12 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 describe('CommonMark => html', () => {
 	var excluded = [];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 35; i++) {
+	for (var i = 1; i < 77; i++) {
 		if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		}
 	}
-	// scoped = [31];
+	// scoped = [67];
 	
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
