@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nicojs/html2commonmark.svg)](https://travis-ci.org/nicojs/html2commonmark)
+
 html2commonmark
 ===============
 CommonMark is a rationalized version of Markdown syntax,

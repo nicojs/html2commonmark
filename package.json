@@ -4,7 +4,7 @@
   "description": " Html coverter to CommonMark using commonmark.js ",
   "main": "dist/html2commonmark.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "node_modules/grunt-cli/bin/grunt test"
   },
   "repository": {
     "type": "git",
