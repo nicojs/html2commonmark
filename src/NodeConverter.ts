@@ -3,7 +3,7 @@ import commonmark = require('commonmark');
 export = class NodeConverter {
 
 	private static TYPES_WITH_MANDATORY_BLOCKED_CONTENT = ['Item', 'BlockQuote'];
-	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u'];
+	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u', 'code'];
 	private static SOFTBREAK_SUBSTITUTION_CHARACTER = '\n';
 
 	static convert(node: Node, container: commonmark.Node): commonmark.Node {
@@ -15,8 +15,7 @@ export = class NodeConverter {
 			case 'pre':
 				return this.createNode('CodeBlock', container);
 			case 'code':
-				this.enrichCodeBlock(node, container);
-				return null;
+				return this.convertCodeTag(node, container);
 			case 'ul':
 			case 'ol':
 				return this.createListNode(node, container);
@@ -49,9 +48,22 @@ export = class NodeConverter {
 		return node;
 	}
 
-	private static enrichCodeBlock(codeNode: Node, codeBlock: commonmark.Node) {
-		if (codeBlock.type === 'CodeBlock' && this.isElement(codeNode)) {
-			let classes = codeNode.classList;
+
+	private static convertCodeTag(codeTag: Node, container: commonmark.Node) {
+		if (container.type === 'CodeBlock') {
+			this.enrichCodeBlock(codeTag, container);
+			return null;
+		} else {
+			let codeBlock = this.createNode('Code', container);
+			codeBlock.literal = ''; // Initialize to an empty string.
+			this.enrichCodeBlock(codeTag, codeBlock);
+			return codeBlock;
+		}
+	}
+
+	private static enrichCodeBlock(codeTag: Node, codeBlock: commonmark.Node) {
+		if (codeBlock.type === 'CodeBlock' && this.isElement(codeTag)) {
+			let classes = codeTag.classList;
 			let info = null;
 			for (let i = 0; i < classes.length; i++) {
 				let clazz = classes.item(i);
@@ -60,6 +72,7 @@ export = class NodeConverter {
 				}
 			}
 			codeBlock.info = info;
+			codeBlock.literal = ''; // initialize with empty string, even if there are no childnodes.
 		}
 	}
 
@@ -98,9 +111,11 @@ export = class NodeConverter {
 			let nodes: Array<commonmark.Node> = [];
 			var lines = textContent.split(this.SOFTBREAK_SUBSTITUTION_CHARACTER);
 			lines.forEach((line, index) => {
-				let node = new commonmark.Node('Text');
-				node.literal = line;
-				nodes.push(node);
+				if (line) {
+					let node = new commonmark.Node('Text');
+					node.literal = line;
+					nodes.push(node);
+				}
 				if (lines.length > 1 && index != (lines.length - 1)) {
 					nodes.push(new commonmark.Node('Softbreak'));
 				}
