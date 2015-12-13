@@ -45,7 +45,15 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 		if(expectedValue.node.info === null || expectedValue.node.info === ''){
 			expect(actualValue.node.info === null || actualValue.node.info === '', `Expecting 'info' of ${expectedValue.node.type} to be null or empty, was ${actualValue.node.info}`).to.be.equal(true);
 		} else{
-			expect(actualValue.node.info, `comparing info of ${expectedValue.node.type}`).to.be.equal(expectedValue.node.info);
+			// When the expected node type contains spaces, that info is lost after rendering
+			let expectedInfo = expectedValue.node.info;
+			if(expectedInfo){
+				let indexOfSpace = expectedInfo.indexOf(' ');
+				if(indexOfSpace >= 0){
+					expectedInfo = expectedInfo.substr(0, indexOfSpace);
+				}				
+			}
+			expect(actualValue.node.info, `comparing info of ${expectedValue.node.type}`).to.be.equal(expectedInfo);
 		}
 		
 		if (expectedValue.node.type === 'list') {
@@ -58,12 +66,12 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 describe('CommonMark => html', () => {
 	var excluded = [];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 100; i++) {
+	for (var i = 1; i < 101; i++) {
 		if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		}
 	}
-	// scoped = [95];
+	// scoped = [100];
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {
