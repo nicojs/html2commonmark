@@ -39,7 +39,7 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 		console.log(`verifying that: ${actualValue.node.type }/${actualValue.node.literal} is ${expectedValue.node.type}/${expectedValue.node.literal}`);
 		expect(actualValue).to.be.ok;
 		['type', 'literal', 'info', 'level', 'title'].forEach
-			(prop => expect(actualValue.node[prop], `comparing ${prop} of ${expectedValue.node.type} ${actualValue.node.type}`).to.be.equal(expectedValue.node[prop]));
+			(prop => expect(actualValue.node[prop], `comparing ${prop} of ${expectedValue.node.type}`).to.be.equal(expectedValue.node[prop]));
 		if (expectedValue.node.type === 'list') {
 			['listTight', 'listTight', 'listStart', 'listDilimiter'].forEach(prop => expect(actualValue.node[prop]).to.be.equal(expectedValue.node[prop]));
 		}
@@ -55,7 +55,7 @@ describe('CommonMark => html', () => {
 			scoped.push(i);
 		}
 	}
-	// scoped = [67];
+	// scoped = [77];
 	
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {

@@ -15,6 +15,7 @@ export = class NodeConverter {
 			case 'pre':
 				return this.createNode('CodeBlock', container);
 			case 'code':
+				this.enrichCodeBlock(node, container);
 				return null;
 			case 'ul':
 			case 'ol':
@@ -48,6 +49,24 @@ export = class NodeConverter {
 		return node;
 	}
 
+	private static enrichCodeBlock(codeNode: Node, codeBlock: commonmark.Node) {
+		if (codeBlock.type === 'CodeBlock' && this.isElement(codeNode)) {
+			let classes = codeNode.classList;
+			let info = null;
+			for (let i = 0; i < classes.length; i++) {
+				let clazz = classes.item(i);
+				if (clazz.substr(0, 9) === 'language-') {
+					info = clazz.substr(9);
+				}
+			}
+			codeBlock.info = info;
+		}
+	}
+
+	private static isElement(domNode: Node): domNode is HTMLElement {
+		return domNode.nodeType === domNode.ELEMENT_NODE;
+	}
+
 	private static createListNode(domNode: Node, container: commonmark.Node) {
 		let list = this.createNode('List', container);
 		list._listData = {};
@@ -58,11 +77,8 @@ export = class NodeConverter {
 				break;
 			case 'ol':
 				list.listType = 'ordered';
-				if(start === null){
-					list.listStart = null;
-				}else{
-					list.listStart = start;
-				}
+				list.listStart = start;
+				break;
 		}
 		return list;
 	}
