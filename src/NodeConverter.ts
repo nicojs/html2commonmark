@@ -1,3 +1,4 @@
+import DomWalker = require('./DomWalker');
 import commonmark = require('commonmark');
 
 export = class NodeConverter {
@@ -6,7 +7,7 @@ export = class NodeConverter {
 	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u', 'code'];
 	private static SOFTBREAK_SUBSTITUTION_CHARACTER = '\n';
 
-	static convert(node: Node, container: commonmark.Node): commonmark.Node {
+	static convert(node: Node, container: commonmark.Node, domWalker: DomWalker): commonmark.Node {
 		let nodeName = node.nodeName.toLowerCase();
 		console.log(`converting ${nodeName}`);
 		switch (nodeName) {
@@ -34,6 +35,16 @@ export = class NodeConverter {
 				return this.createInlineNode('Emph', container);
 			case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': case 'h7': case 'h8': case 'h9':
 				return this.createHeaderNode(parseInt(nodeName.substr(1)), container);
+			case 'address': case 'article': case 'aside': case 'base': case 'basefont': 
+			/*case 'blockquote': case 'body':*/ case 'caption': case 'center': case 'col': case 'colgroup':
+			case 'dd': case 'details': case 'dialog': case 'dir': case 'div': case 'dl': case 'dt':
+			case 'fieldset': case 'figcaption': case 'figure': case 'footer': case 'form': case 'frame':
+			case 'frameset': /*case 'h1':*/ case 'head': case 'header': /*case 'hr':*/ case 'html':
+			case 'iframe': case 'legend': /*case 'li':*/ case 'link': case 'main': case 'menu':
+			case 'menuitem': case 'meta': case 'nav': case 'noframes': /*case 'ol':*/ case 'optgroup': case 'option': 
+			/*case 'p':*/ case 'param': case 'section': case 'source': case 'summary': case 'table': case 'tbody':
+			case 'td': case 'tfoot': case 'th': case 'thead': case 'title': case 'tr': case 'track': /*case 'ul':*/
+				return this.createHtmlBlock(node, container, domWalker);
 			default:
 				console.log(`Missing covertion for ${nodeName}.`)
 				return this.createNode('Paragraph', container);
@@ -48,6 +59,18 @@ export = class NodeConverter {
 		return node;
 	}
 
+	private static createHtmlBlock(current: Node, container: commonmark.Node, domWalker: DomWalker) {
+		if (this.isElement(current)) {
+			let htmlBlock = this.createNode('HtmlBlock', container);
+			htmlBlock.literal = current.outerHTML;
+			
+			// leave current node immediately
+			domWalker.resumeAt(current, false); 
+			return htmlBlock;
+		}else{
+			return null;
+		}
+	}
 
 	private static convertCodeTag(codeTag: Node, container: commonmark.Node) {
 		if (container.type === 'CodeBlock') {

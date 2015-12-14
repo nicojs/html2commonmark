@@ -2,8 +2,8 @@ import tests = require('./read-commonmark-tests');
 import chai = require('chai');
 import Parser = require('../../../src/Parser');
 import commonmark = require('commonmark');
+import compareHtml = require('./compare-html');
 let sut = new Parser();
-
 
 let expect = chai.expect;
 let parser = new commonmark.Parser();
@@ -38,24 +38,26 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 		var actualValue = actualWalker.next();
 		console.log(`verifying that: ${actualValue.node.type }/${actualValue.node.literal} is ${expectedValue.node.type}/${expectedValue.node.literal}`);
 		expect(actualValue).to.be.ok;
-		['type', 'literal', 'level', 'title'].forEach
+		['type', 'level', 'title'].forEach
 			(prop => expect(actualValue.node[prop], `comparing ${prop} of ${expectedValue.node.type}`).to.be.equal(expectedValue.node[prop]));
 
+		assertLiteral(expectedValue.node, actualValue.node);
+		
 		// Sometimes 'info' (from CodeBlock) is null vs empty string. Not sure how to detect the differences
-		if(expectedValue.node.info === null || expectedValue.node.info === ''){
+		if (expectedValue.node.info === null || expectedValue.node.info === '') {
 			expect(actualValue.node.info === null || actualValue.node.info === '', `Expecting 'info' of ${expectedValue.node.type} to be null or empty, was ${actualValue.node.info}`).to.be.equal(true);
-		} else{
+		} else {
 			// When the expected node type contains spaces, that info is lost after rendering
 			let expectedInfo = expectedValue.node.info;
-			if(expectedInfo){
+			if (expectedInfo) {
 				let indexOfSpace = expectedInfo.indexOf(' ');
-				if(indexOfSpace >= 0){
+				if (indexOfSpace >= 0) {
 					expectedInfo = expectedInfo.substr(0, indexOfSpace);
-				}				
+				}
 			}
 			expect(actualValue.node.info, `comparing info of ${expectedValue.node.type}`).to.be.equal(expectedInfo);
 		}
-		
+
 		if (expectedValue.node.type === 'list') {
 			['listTight', 'listTight', 'listStart', 'listDilimiter'].forEach(prop => expect(actualValue.node[prop]).to.be.equal(expectedValue.node[prop]));
 		}
@@ -63,15 +65,26 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 	}
 }
 
+var assertLiteral = (expecedValue: commonmark.Node, actualValue: commonmark.Node) => {
+	let deferred: any;
+
+	if (expecedValue.type === 'HtmlBlock') {
+		// Compare the dom
+		compareHtml(expecedValue.literal, actualValue.literal);
+	} else {
+		expect(actualValue.literal, 'comparing literal of HtmlBlock').to.be.equal(expecedValue.literal);
+	}
+}
+
 describe('CommonMark => html', () => {
-	var excluded = [];
+	var excluded = [106, 107];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 101; i++) {
+	for (var i = 1; i < 110; i++) {
 		if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		}
 	}
-	// scoped = [100];
+	// scoped = [106];
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {

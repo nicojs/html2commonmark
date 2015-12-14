@@ -33,7 +33,7 @@ export = class Parser {
 		while (step = walker.next()) {
 			console.log(`Current step: ${step.isEntering ? 'entering' : 'leaving'} ${step.domNode.nodeName} (${step.domNode.nodeType})`)
 			if (step.isEntering) {
-				let next = NodeConverter.convert(step.domNode, parent);
+				let next = NodeConverter.convert(step.domNode, parent, walker);
 				if (next) {
 					current = next;
 					if (current) {
