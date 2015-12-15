@@ -35,7 +35,7 @@ declare module commonmark {
         parent: Node;
         sourcepos: Position;
         literal: string;
-        destination: any;
+        destination: string;
         title: string;
         info: any;
         level: number;

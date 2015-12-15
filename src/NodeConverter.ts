@@ -4,13 +4,15 @@ import commonmark = require('commonmark');
 export = class NodeConverter {
 
 	private static TYPES_WITH_MANDATORY_BLOCKED_CONTENT = ['Item', 'BlockQuote'];
-	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u', 'code'];
+	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u', 'code', 'a'];
 	private static SOFTBREAK_SUBSTITUTION_CHARACTER = '\n';
 
 	static convert(node: Node, container: commonmark.Node, domWalker: DomWalker): commonmark.Node {
 		let nodeName = node.nodeName.toLowerCase();
 		console.log(`converting ${nodeName}`);
 		switch (nodeName) {
+			case 'a':
+				return this.createLink(node, container);
 			case 'body':
 				return this.createNode('Document', container);
 			case 'pre':
@@ -60,13 +62,13 @@ export = class NodeConverter {
 	private static createHtmlBlock(current: Node, container: commonmark.Node, domWalker: DomWalker) {
 		if (this.isElement(current)) {
 			let htmlBlock = this.createNode('HtmlBlock', container);
-			
+
 			htmlBlock.literal = current.outerHTML;
 			
 			// leave current node immediately
-			domWalker.resumeAt(current, false); 
+			domWalker.resumeAt(current, false);
 			return htmlBlock;
-		}else{
+		} else {
 			return null;
 		}
 	}
@@ -81,6 +83,23 @@ export = class NodeConverter {
 			this.enrichCodeBlock(codeTag, codeBlock);
 			return codeBlock;
 		}
+	}
+
+	private static createLink(anchorTag: Node, container: commonmark.Node) {
+		let linkNode = this.createNode('Link', container);
+		let href = anchorTag.attributes.getNamedItem('href');
+		let title = anchorTag.attributes.getNamedItem('title');
+		if (href) {
+			linkNode.destination = href.value;
+		}else{
+			linkNode.destination = '';
+		}
+		if (title) {
+			linkNode.title = title.value;
+		}else{
+			linkNode.title = '';
+		}
+		return linkNode;
 	}
 
 	private static enrichCodeBlock(codeTag: Node, codeBlock: commonmark.Node) {

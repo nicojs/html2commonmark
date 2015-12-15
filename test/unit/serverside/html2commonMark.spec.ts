@@ -32,13 +32,13 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 	let actualWalker = astActual.walker();
 	let expectedValue: commonmark.WalkingStep;
 
-	// console.log('expected: ', new commonmark['XmlRenderer']().render(astExpected));
-	// console.log('actual: ', new commonmark['XmlRenderer']().render(astActual));
+	console.log('expected: ', new commonmark['XmlRenderer']().render(astExpected));
+	console.log('actual: ', new commonmark['XmlRenderer']().render(astActual));
 	while (expectedValue = expectedWalker.next()) {
 		var actualValue = actualWalker.next();
 		console.log(`verifying that: ${actualValue.node.type }/${actualValue.node.literal} is ${expectedValue.node.type}/${expectedValue.node.literal}`);
 		expect(actualValue).to.be.ok;
-		['type', 'level', 'title'].forEach
+		['type', 'level', 'title', 'destination'].forEach
 			(prop => expect(actualValue.node[prop], `comparing ${prop} of ${expectedValue.node.type}`).to.be.equal(expectedValue.node[prop]));
 
 		assertLiteral(expectedValue.node, actualValue.node);
@@ -77,15 +77,16 @@ var assertLiteral = (expecedValue: commonmark.Node, actualValue: commonmark.Node
 }
 
 describe('CommonMark => html', () => {
-	var excluded = [106, 107, 110, 111, 112, 113, 116, 119];
+	// var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124];
+	var excludedSections = ['HTML blocks', 'Hard line breaks'];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 120; i++) {
-		if (excluded.indexOf(i) < 0) {
+	for (var i = 1; i < 160; i++) {
+		// if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
-		}
+		// }
 	}
-	// scoped = [120];
-	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
+	// scoped = [176];
+	tests.filter(t => scoped.indexOf(t.example) >= 0 && excludedSections.indexOf(t.section) < 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {
 				try {

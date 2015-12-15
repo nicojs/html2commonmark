@@ -15,7 +15,7 @@ export = class Parser {
 		});
 		html = html.trim();
 
-		jsdom.env(html, (error, window) => {
+		jsdom.env( html, {features: {FetchExternalResources: false, ProcessExternalResources: false }}, (error, window) => {
 			if (error) {
 				deferred.error(error);
 			} else {
