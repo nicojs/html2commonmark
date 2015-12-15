@@ -13,6 +13,8 @@ export = class NodeConverter {
 		switch (nodeName) {
 			case 'a':
 				return this.createLink(node, container);
+			case 'br':
+				return this.createNode('Hardbreak', container);
 			case 'body':
 				return this.createNode('Document', container);
 			case 'pre':
@@ -91,12 +93,12 @@ export = class NodeConverter {
 		let title = anchorTag.attributes.getNamedItem('title');
 		if (href) {
 			linkNode.destination = href.value;
-		}else{
+		} else {
 			linkNode.destination = '';
 		}
 		if (title) {
 			linkNode.title = title.value;
-		}else{
+		} else {
 			linkNode.title = '';
 		}
 		return linkNode;

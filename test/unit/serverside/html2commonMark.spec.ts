@@ -80,7 +80,7 @@ describe('CommonMark => html', () => {
 	// var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124];
 	var excludedSections = ['HTML blocks', 'Hard line breaks'];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 160; i++) {
+	for (var i = 1; i < 180; i++) {
 		// if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		// }
