@@ -77,14 +77,14 @@ var assertLiteral = (expecedValue: commonmark.Node, actualValue: commonmark.Node
 }
 
 describe('CommonMark => html', () => {
-	var excluded = [106, 107];
+	var excluded = [106, 107, 110, 111, 112, 113, 116, 119];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 110; i++) {
+	for (var i = 1; i < 120; i++) {
 		if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		}
 	}
-	// scoped = [106];
+	// scoped = [120];
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {

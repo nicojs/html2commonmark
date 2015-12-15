@@ -44,10 +44,8 @@ export = class NodeConverter {
 			case 'menuitem': case 'meta': case 'nav': case 'noframes': /*case 'ol':*/ case 'optgroup': case 'option': 
 			/*case 'p':*/ case 'param': case 'section': case 'source': case 'summary': case 'table': case 'tbody':
 			case 'td': case 'tfoot': case 'th': case 'thead': case 'title': case 'tr': case 'track': /*case 'ul':*/
-				return this.createHtmlBlock(node, container, domWalker);
 			default:
-				console.log(`Missing covertion for ${nodeName}.`)
-				return this.createNode('Paragraph', container);
+				return this.createHtmlBlock(node, container, domWalker);
 		}
 	}
 
@@ -62,6 +60,7 @@ export = class NodeConverter {
 	private static createHtmlBlock(current: Node, container: commonmark.Node, domWalker: DomWalker) {
 		if (this.isElement(current)) {
 			let htmlBlock = this.createNode('HtmlBlock', container);
+			
 			htmlBlock.literal = current.outerHTML;
 			
 			// leave current node immediately
