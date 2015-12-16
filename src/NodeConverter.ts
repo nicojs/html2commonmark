@@ -4,7 +4,7 @@ import commonmark = require('commonmark');
 export = class NodeConverter {
 
 	private static TYPES_WITH_MANDATORY_BLOCKED_CONTENT = ['Item', 'BlockQuote'];
-	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u', 'code', 'a'];
+	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u', 'code', 'a', 'img'];
 	private static SOFTBREAK_SUBSTITUTION_CHARACTER = '\n';
 
 	static convert(node: Node, container: commonmark.Node, domWalker: DomWalker): commonmark.Node {
@@ -66,7 +66,17 @@ export = class NodeConverter {
 
 	private static createHtmlBlock(current: Node, container: commonmark.Node, domWalker: DomWalker) {
 		if (this.isElement(current)) {
-			let htmlBlock = this.createNode('HtmlBlock', container);
+			let step = domWalker.current;
+			let isInline = true;
+			do{
+				isInline = this.INLINE_HTML_NODES.indexOf(step.nodeName.toLowerCase()) >= 0;
+			}while(isInline && (step = domWalker.next().domNode) !== current);
+			
+			let nodeName = 'HtmlBlock';
+			if(isInline){
+				nodeName = 'Html';
+			}
+			let htmlBlock = this.createNode(nodeName, container);
 
 			htmlBlock.literal = current.outerHTML;
 			

@@ -66,7 +66,7 @@ let assertEqual = (astExpected: commonmark.Node, astActual: commonmark.Node) => 
 }
 
 var assertLiteral = (expecedValue: commonmark.Node, actualValue: commonmark.Node) => {
-	if (expecedValue.type === 'HtmlBlock') {
+	if (expecedValue.type === 'HtmlBlock' || expecedValue.type === 'Html') {
 		// Compare the dom
 		compareHtml(expecedValue.literal, actualValue.literal);
 	} else {
@@ -75,15 +75,15 @@ var assertLiteral = (expecedValue: commonmark.Node, actualValue: commonmark.Node
 }
 
 describe('CommonMark => html', () => {
-	var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124, 282, 286, 292, 308];
-	var excludedSections = ['HTML blocks', 'Hard line breaks'];
+	var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124, 282, 286, 292, 308, 436, 437];
+	var excludedSections = ['HTML blocks'];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 400; i++) {
+	for (var i = 1; i < 440; i++) {
 		if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		}
 	}
-	// scoped = [340];
+	// scoped = [437]; // 436 437
 	tests.filter(t => scoped.indexOf(t.example) >= 0 && excludedSections.indexOf(t.section) < 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {
