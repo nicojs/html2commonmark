@@ -23,6 +23,27 @@ function normalizeTree(root: commonmark.Node) {
 			currentNode.unlink();
 			walker.resumeAt(newNode);
 		}
+		
+		if(currentNode.type === 'Image'){
+			/* 
+			"Though this spec is concerned with parsing, not rendering, it is recommended that in rendering to HTML, only the plain string content of the image description be used. Note that in the above example, the alt attribute’s value is foo bar, not foo [bar](/url) or foo <a href="/url">bar</a>. Only the plain string content is rendered, without formatting."
+			 - http://spec.commonmark.org/0.22/#images
+			 
+			 So normalize the content to be just one text node is fine
+			*/
+			let text = '';
+			while( (current = walker.next()).node !== currentNode){
+				if(current.entering && current.node.literal){
+					text += current.node.literal;
+				}
+			}
+			while(currentNode.firstChild){
+				currentNode.firstChild.unlink();
+			}
+			let textNode = new commonmark.Node('Text');
+			textNode.literal = text;
+			currentNode.appendChild(textNode);
+		}
 	}
 	return root;
 }
@@ -75,15 +96,15 @@ var assertLiteral = (expecedValue: commonmark.Node, actualValue: commonmark.Node
 }
 
 describe('CommonMark => html', () => {
-	var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124, 282, 286, 292, 308, 436, 437];
+	var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124, 282, 286, 292, 308, 435, 436, 437, 449];
 	var excludedSections = ['HTML blocks'];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 440; i++) {
+	for (var i = 0; i < 540; i++) {
 		if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		}
 	}
-	// scoped = [437]; // 436 437
+	// scoped = [473];
 	tests.filter(t => scoped.indexOf(t.example) >= 0 && excludedSections.indexOf(t.section) < 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {
