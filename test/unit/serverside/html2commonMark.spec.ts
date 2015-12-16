@@ -78,12 +78,12 @@ describe('CommonMark => html', () => {
 	var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124, 282, 286, 292, 308];
 	var excludedSections = ['HTML blocks', 'Hard line breaks'];
 	var scoped: Array<number> = [];
-	for (var i = 1; i < 340; i++) {
+	for (var i = 1; i < 400; i++) {
 		if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		}
 	}
-	// scoped = [308];
+	// scoped = [340];
 	tests.filter(t => scoped.indexOf(t.example) >= 0 && excludedSections.indexOf(t.section) < 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {

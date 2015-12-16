@@ -37,6 +37,9 @@ export = class NodeConverter {
 			case 'i':
 			case 'em':
 				return this.createInlineNode('Emph', container);
+			case 'b':
+			case 'strong':
+				return this.createInlineNode('Strong', container);
 			case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': case 'h7': case 'h8': case 'h9':
 				return this.createHeaderNode(parseInt(nodeName.substr(1)), container);
 			case 'address': case 'article': case 'aside': case 'base': case 'basefont': 
