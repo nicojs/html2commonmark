@@ -5,6 +5,7 @@ export = class NodeConverter {
 
 	private static TYPES_WITH_MANDATORY_BLOCKED_CONTENT = ['Item', 'BlockQuote'];
 	private static INLINE_HTML_NODES = ['i', 'b', 'em', 'strong', 'u', 'code', 'a', 'img'];
+	private static BLOCK_HTML_NODES = ['p', 'body', 'ul', 'li', 'ol', 'hr', 'br', 'blockquote', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9'];
 	private static SOFTBREAK_SUBSTITUTION_CHARACTER = '\n';
 
 	static convert(node: Node, container: commonmark.Node, domWalker: DomWalker): commonmark.Node {
@@ -21,6 +22,8 @@ export = class NodeConverter {
 				return this.createNode('CodeBlock', container);
 			case 'code':
 				return this.convertCodeTag(node, container);
+			case 'img':
+				return this.convertImageNode(node, container);
 			case 'ul':
 			case 'ol':
 				return this.createListNode(node, container);
@@ -64,16 +67,39 @@ export = class NodeConverter {
 		return node;
 	}
 
+	private static convertImageNode(imgTag: Node, container: commonmark.Node) {
+		let imageNode = this.createInlineNode('Image', container);
+		let href = imgTag.attributes.getNamedItem('src');
+		let title = imgTag.attributes.getNamedItem('title');
+		let alternative = imgTag.attributes.getNamedItem('alt');
+		if(alternative){
+			let altTextNode = new commonmark.Node('Text');
+			imageNode.appendChild(altTextNode);
+			altTextNode.literal = alternative.value;
+		}
+		if (href) {
+			imageNode.destination = href.value;
+		} else {
+			imageNode.destination = '';
+		}
+		if (title) {
+			imageNode.title = title.value;
+		} else {
+			imageNode.title = '';
+		}
+		return imageNode;
+	}
+
 	private static createHtmlBlock(current: Node, container: commonmark.Node, domWalker: DomWalker) {
 		if (this.isElement(current)) {
 			let step = domWalker.current;
-			let isInline = true;
-			do{
-				isInline = this.INLINE_HTML_NODES.indexOf(step.nodeName.toLowerCase()) >= 0;
-			}while(isInline && (step = domWalker.next().domNode) !== current);
-			
+			let isInline: boolean;
+			do {
+				isInline = this.isInline(step);
+			} while (isInline && (step = domWalker.next().domNode) !== current);
+
 			let nodeName = 'HtmlBlock';
-			if(isInline){
+			if (isInline) {
 				nodeName = 'Html';
 			}
 			let htmlBlock = this.createNode(nodeName, container);
@@ -101,7 +127,7 @@ export = class NodeConverter {
 	}
 
 	private static createLink(anchorTag: Node, container: commonmark.Node) {
-		let linkNode = this.createNode('Link', container);
+		let linkNode = this.createInlineNode('Link', container);
 		let href = anchorTag.attributes.getNamedItem('href');
 		let title = anchorTag.attributes.getNamedItem('title');
 		if (href) {
@@ -115,6 +141,10 @@ export = class NodeConverter {
 			linkNode.title = '';
 		}
 		return linkNode;
+	}
+
+	private static createInlineNode(name: string, container: commonmark.Node) {
+		return this.addInlineBlocks([new commonmark.Node(name)], container);
 	}
 
 	private static enrichCodeBlock(codeTag: Node, codeBlock: commonmark.Node) {
@@ -209,14 +239,10 @@ export = class NodeConverter {
 
 	private static isInline(domNode: Node) {
 		if (domNode) {
-			return domNode.nodeType === domNode.TEXT_NODE || (domNode.nodeType === domNode.ELEMENT_NODE && this.INLINE_HTML_NODES.indexOf(domNode.nodeName.toLowerCase()) >= 0);
+			return domNode.nodeType === domNode.TEXT_NODE || (domNode.nodeType === domNode.ELEMENT_NODE && this.BLOCK_HTML_NODES.indexOf(domNode.nodeName.toLowerCase()) < 0);
 		} else {
 			return false;
 		}
-	}
-
-	private static createInlineNode(name: string, container: commonmark.Node) {
-		return this.addInlineBlocks([new commonmark.Node(name)], container);
 	}
 
 	private static addInlineBlocks(nodes: Array<commonmark.Node>, container: commonmark.Node): commonmark.Node {
