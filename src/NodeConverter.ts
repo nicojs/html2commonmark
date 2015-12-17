@@ -55,12 +55,13 @@ export = class NodeConverter {
 			/*case 'p':*/ case 'param': case 'section': case 'source': case 'summary': case 'table': case 'tbody':
 			case 'td': case 'tfoot': case 'th': case 'thead': case 'title': case 'tr': case 'track': /*case 'ul':*/
 			default:
-				return this.createHtmlBlock(node, container, domWalker);
+				return this.convertHtmlRaw(node, container, domWalker);
 		}
 	}
 
-	private static createNode(nodeName: string, container: commonmark.Node) {
+	private static createNode(nodeName: string, container: commonmark.Node, literal: string = null) {
 		let node = new commonmark.Node(nodeName);
+		node.literal = literal;
 		if (container) {
 			container.appendChild(node);
 		}
@@ -72,7 +73,7 @@ export = class NodeConverter {
 		let href = imgTag.attributes.getNamedItem('src');
 		let title = imgTag.attributes.getNamedItem('title');
 		let alternative = imgTag.attributes.getNamedItem('alt');
-		if(alternative){
+		if (alternative) {
 			let altTextNode = new commonmark.Node('Text');
 			imageNode.appendChild(altTextNode);
 			altTextNode.literal = alternative.value;
@@ -90,25 +91,25 @@ export = class NodeConverter {
 		return imageNode;
 	}
 
-	private static createHtmlBlock(current: Node, container: commonmark.Node, domWalker: DomWalker) {
-		if (this.isElement(current)) {
+	private static convertHtmlRaw(rawHtmlNode: Node, container: commonmark.Node, domWalker: DomWalker) {
+		if (this.isElement(rawHtmlNode)) {
 			let step = domWalker.current;
 			let isInline: boolean;
 			do {
 				isInline = this.isInline(step);
-			} while (isInline && (step = domWalker.next().domNode) !== current);
+			} while (isInline && (step = domWalker.next().domNode) !== rawHtmlNode);
 
 			let nodeName = 'HtmlBlock';
 			if (isInline) {
 				nodeName = 'Html';
 			}
-			let htmlBlock = this.createNode(nodeName, container);
-
-			htmlBlock.literal = current.outerHTML;
+			let htmlBlock = this.createNode(nodeName, container, rawHtmlNode.outerHTML);
 			
 			// leave current node immediately
-			domWalker.resumeAt(current, false);
+			domWalker.resumeAt(rawHtmlNode, false);
 			return htmlBlock;
+		} else if (this.isComment(rawHtmlNode)) {
+			return this.createNode('Html', container, '<!--' + rawHtmlNode.data + '-->');
 		} else {
 			return null;
 		}
@@ -160,6 +161,10 @@ export = class NodeConverter {
 			codeBlock.info = info;
 			codeBlock.literal = ''; // initialize with empty string, even if there are no childnodes.
 		}
+	}
+
+	private static isComment(domNode: Node): domNode is Comment {
+		return domNode.nodeType === domNode.COMMENT_NODE;
 	}
 
 	private static isElement(domNode: Node): domNode is HTMLElement {
@@ -239,7 +244,9 @@ export = class NodeConverter {
 
 	private static isInline(domNode: Node) {
 		if (domNode) {
-			return domNode.nodeType === domNode.TEXT_NODE || (domNode.nodeType === domNode.ELEMENT_NODE && this.BLOCK_HTML_NODES.indexOf(domNode.nodeName.toLowerCase()) < 0);
+			return domNode.nodeType === domNode.TEXT_NODE ||
+			domNode.nodeType === domNode.COMMENT_NODE || 
+			(domNode.nodeType === domNode.ELEMENT_NODE && this.BLOCK_HTML_NODES.indexOf(domNode.nodeName.toLowerCase()) < 0);
 		} else {
 			return false;
 		}

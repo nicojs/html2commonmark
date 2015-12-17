@@ -91,20 +91,20 @@ var assertLiteral = (expecedValue: commonmark.Node, actualValue: commonmark.Node
 		// Compare the dom
 		compareHtml(expecedValue.literal, actualValue.literal);
 	} else {
-		expect(actualValue.literal, 'comparing literal of HtmlBlock').to.be.equal(expecedValue.literal);
+		expect(actualValue.literal, `comparing literal of ${expecedValue.type}`).to.be.equal(expecedValue.literal);
 	}
 }
 
 describe('CommonMark => html', () => {
-	var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124, 282, 286, 292, 308, 435, 436, 437, 449];
+	var excluded = [106, 107, 110, 111, 112, 113, 116, 119, 120, 122, 123, 124, 282, 286, 292, 308, 435, 436, 437, 449, 559, 559, 560, 561, 562, 563, 569];
 	var excludedSections = ['HTML blocks'];
 	var scoped: Array<number> = [];
-	for (var i = 0; i < 540; i++) {
+	for (var i = 0; i < 572; i++) {
 		if (excluded.indexOf(i) < 0) {
 			scoped.push(i);
 		}
 	}
-	// scoped = [473];
+	// scoped = [571];
 	tests.filter(t => scoped.indexOf(t.example) >= 0 && excludedSections.indexOf(t.section) < 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
 			sut.parse(test.html).then(result => {

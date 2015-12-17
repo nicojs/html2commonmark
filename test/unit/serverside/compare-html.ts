@@ -4,13 +4,17 @@ let GroupingReporter = require('dom-compare').GroupingReporter;
 let compare = require('dom-compare').compare
 let expect = chai.expect;
 
+function wrapInDocument(htmlFragment: string){
+	return `<html><body>${htmlFragment}</body></html>`;
+}
+
 export = (expectedHtml: string, actualHtml: string) => {
-	let expectedBody = jsdom.jsdom(expectedHtml).defaultView.document.body;
-	let actualBody = jsdom.jsdom(actualHtml).defaultView.document.body;
-	let result = compare(expectedBody, actualBody);
+	let expectedBody = jsdom.jsdom(wrapInDocument(expectedHtml)).defaultView.document.body;
+	let actualBody = jsdom.jsdom(wrapInDocument(actualHtml)).defaultView.document.body;
+	let result = compare(expectedBody, actualBody, {compareComments: true});
 	let diff: string;
 	if (!result.getResult()) {
-		diff = `Expect: ${expectedBody.outerHTML} to be: ${actualBody.outerHTML}. `;
+		diff = `Expect: ${actualBody.outerHTML} to be: ${expectedBody.outerHTML}. `;
 		diff += GroupingReporter.report(result);
 	}
 	expect(result.getResult(), diff).to.equal(true);
