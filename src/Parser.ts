@@ -13,7 +13,7 @@ export = class Parser {
 	
 	parseDomNode(htmlNode: Node): commonmark.Node {
 		let walker = new DomWalker(htmlNode);
-		let conversion = convert(walker.next(), walker);
+		let conversion = convert(walker.next().domNode, { domWalker: walker, options: {} });
 		return conversion.execute();
 	}
 }

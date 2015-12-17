@@ -3,45 +3,47 @@ import commonmark = require('commonmark');
 import DomUtil = require('./DomUtil');
 import MarkdownUtil = require('./MarkdownUtil');
 
-interface NodeConversion {
-	execute(container?: commonmark.Node): commonmark.Node;
+
+interface ConversionState{
+	domWalker: DomWalker;
+	options: Html2MarkdownConversionOptions;
 }
 
-function convert(currentStep: WalkingStep, domWalker: DomWalker): NodeConversion {
-	switch (currentStep.domNode.nodeName.toLowerCase()) {
+function convert(domNode: Node, state: ConversionState): NodeConversion {
+	switch (domNode.nodeName.toLowerCase()) {
 		case 'a':
-			return new LinkConversion(currentStep.domNode, domWalker);
+			return new LinkConversion(state, domNode);
 		case 'br':
-			return new NamedContainerConversion('Hardbreak', domWalker);
+			return new NamedContainerConversion(state, 'Hardbreak');
 		case 'body':
-			return new NamedContainerConversion('Document', domWalker);
+			return new NamedContainerConversion(state, 'Document');
 		case 'pre':
-			return new NamedContainerConversion('CodeBlock', domWalker);
+			return new NamedContainerConversion(state, 'CodeBlock');
 		case 'code':
-			return new CodeBlockConversion(currentStep.domNode, domWalker);
+			return new CodeBlockConversion(state, domNode);
 		case 'img':
-			return new ImageConversion(currentStep.domNode, domWalker);
+			return new ImageConversion(state, domNode);
 		case 'ul':
 		case 'ol':
-			return new ListConversion(currentStep.domNode, domWalker);
+			return new ListConversion(state, domNode);
 		case 'li':
-			return new NamedContainerConversion('Item', domWalker);
+			return new NamedContainerConversion(state, 'Item');
 		case 'p':
-			return new NamedContainerConversion('Paragraph', domWalker);
+			return new NamedContainerConversion(state, 'Paragraph');
 		case 'hr':
-			return new NamedContainerConversion('HorizontalRule', domWalker);
+			return new NamedContainerConversion(state, 'HorizontalRule');
 		case '#text':
-			return new TextConversion(currentStep.domNode, domWalker);
+			return new TextConversion(state, domNode);
 		case 'blockquote':
-			return new NamedContainerConversion('BlockQuote', domWalker);
+			return new NamedContainerConversion(state, 'BlockQuote');
 		case 'i':
 		case 'em':
-			return new InlineConversion('Emph', domWalker);
+			return new InlineConversion(state, 'Emph');
 		case 'b':
 		case 'strong':
-			return new InlineConversion('Strong', domWalker);
+			return new InlineConversion(state, 'Strong');
 		case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': case 'h7': case 'h8': case 'h9':
-			return new HeaderConversion(parseInt(currentStep.domNode.nodeName.substr(1)), domWalker);
+			return new HeaderConversion(state, parseInt(domNode.nodeName.substr(1)));
 		case 'address': case 'article': case 'aside': case 'base': case 'basefont': 
 			/*case 'blockquote': case 'body':*/ case 'caption': case 'center': case 'col': case 'colgroup':
 		case 'dd': case 'details': case 'dialog': case 'dir': case 'div': case 'dl': case 'dt':
@@ -52,7 +54,7 @@ function convert(currentStep: WalkingStep, domWalker: DomWalker): NodeConversion
 			/*case 'p':*/ case 'param': case 'section': case 'source': case 'summary': case 'table': case 'tbody':
 		case 'td': case 'tfoot': case 'th': case 'thead': case 'title': case 'tr': case 'track': /*case 'ul':*/
 		default:
-			return new RawHtmlConversion(currentStep.domNode, domWalker);
+			return new RawHtmlConversion(state, domNode);
 	}
 }
 
@@ -60,11 +62,11 @@ abstract class AbstractNodeConversion implements NodeConversion {
 
 	protected children: Array<NodeConversion>;
 
-	constructor(protected domWalker: DomWalker) {
+	constructor(state: ConversionState) {
 		this.children = [];
 		let next: WalkingStep;
-		while ((next = domWalker.next()).isEntering) {
-			this.children.push(convert(next, domWalker));
+		while ((next = state.domWalker.next()).isEntering) {
+			this.children.push(convert(next.domNode, state));
 		}
 	}
 
@@ -73,8 +75,8 @@ abstract class AbstractNodeConversion implements NodeConversion {
 
 class NamedContainerConversion extends AbstractNodeConversion {
 
-	public constructor(protected nodeName: string, domWalker: DomWalker, protected literal: string = null) {
-		super(domWalker);
+	public constructor(state: ConversionState, protected nodeName: string, protected literal: string = null) {
+		super(state);
 	}
 
 	public execute(container?: commonmark.Node): commonmark.Node {
@@ -89,8 +91,8 @@ class NamedContainerConversion extends AbstractNodeConversion {
 }
 
 class LinkConversion extends NamedContainerConversion {
-	constructor(private anchorTag: Node, domWalker: DomWalker) {
-		super('Link', domWalker);
+	constructor(state: ConversionState, private anchorTag: Node) {
+		super(state, 'Link');
 	}
 
 	public execute(container: commonmark.Node) {
@@ -112,8 +114,8 @@ class LinkConversion extends NamedContainerConversion {
 }
 
 class HeaderConversion extends NamedContainerConversion {
-	public constructor(private level: number, domWalker: DomWalker) {
-		super('Header', domWalker);
+	public constructor(state: ConversionState, private level: number) {
+		super(state, 'Header');
 	}
 
 	public execute(container: commonmark.Node) {
@@ -125,8 +127,8 @@ class HeaderConversion extends NamedContainerConversion {
 
 class InlineConversion extends AbstractNodeConversion {
 
-	public constructor(private nodeName: string, domWalker) {
-		super(domWalker);
+	public constructor(state: ConversionState, private nodeName: string) {
+		super(state);
 	}
 
 	public execute(container: commonmark.Node) {
@@ -142,8 +144,8 @@ class TextConversion extends AbstractNodeConversion {
 	private static INLINE_HTML_NODES_OF_WHICH_SIBLINGS_SHOULD_BE_TRIMMED = ['br', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9'];
 	private static SOFTBREAK_SUBSTITUTION_CHARACTER = '\n';
 
-	constructor(private textNode: Node, domWalker: DomWalker) {
-		super(domWalker);
+	constructor(state: ConversionState, private textNode: Node) {
+		super(state);
 	}
 
 	public execute(container: commonmark.Node) {
@@ -213,8 +215,8 @@ class TextConversion extends AbstractNodeConversion {
 
 class ImageConversion extends NamedContainerConversion {
 
-	constructor(private imgTag: Node, domWalker: DomWalker) {
-		super('Image', domWalker);
+	constructor(state: ConversionState, private imgTag: Node) {
+		super(state, 'Image');
 	}
 
 	public execute(container: commonmark.Node) {
@@ -244,8 +246,8 @@ class ImageConversion extends NamedContainerConversion {
 
 class ListConversion extends NamedContainerConversion {
 
-	constructor(private listTag: Node, domWalker: DomWalker) {
-		super('List', domWalker);
+	constructor(state: ConversionState, private listTag: Node) {
+		super(state, 'List');
 	}
 
 	public execute(container: commonmark.Node) {
@@ -267,8 +269,8 @@ class ListConversion extends NamedContainerConversion {
 
 class CodeBlockConversion extends AbstractNodeConversion {
 
-	constructor(private codeTag: Node, protected domWalker: DomWalker) {
-		super(domWalker);
+	constructor(state: ConversionState, private codeTag: Node) {
+		super(state);
 	}
 
 	public execute(container: commonmark.Node) {
@@ -309,8 +311,9 @@ class RawHtmlConversion implements NodeConversion {
 
 	private htmlBlock: commonmark.Node;
 
-	public constructor(rawHtmlNode: Node, domWalker: DomWalker) {
+	public constructor(state: ConversionState, rawHtmlNode: Node) {
 		if (DomUtil.isElement(rawHtmlNode)) {
+			let domWalker = state.domWalker;
 			let step = domWalker.current;
 			let isInline: boolean;
 			do {
