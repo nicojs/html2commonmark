@@ -1,7 +1,7 @@
 import jsdom = require('jsdom');
 import DomWalker = require('./DomWalker');
-import NodeConverter = require('./NodeConverter');
 import commonmark = require('commonmark');
+import AbstractNodeConversion = require('./NodeConversion');
 
 export = class Parser {
 
@@ -24,37 +24,10 @@ export = class Parser {
 		});
 		return p.then(node => this.parseDomNode(node), deferred.error);
 	}
-
+	
 	parseDomNode(htmlNode: Node): commonmark.Node {
-		let skippedDomNodes: Array<Node> = [];
 		let walker = new DomWalker(htmlNode);
-		let step: WalkingStep;
-		let current: commonmark.Node, parent: commonmark.Node;
-		while (step = walker.next()) {
-			console.log(`Current step: ${step.isEntering ? 'entering' : 'leaving'} ${step.domNode.nodeName} (${step.domNode.nodeType})`)
-			if (step.isEntering) {
-				let next = NodeConverter.convert(step.domNode, parent, walker);
-				if (next) {
-					current = next;
-					if (current) {
-						// Progress to next node
-						parent = current;
-					} 
-				} else {
-					console.log(`skipped ${step.domNode.nodeName}, data: "${step.domNode['data']}"`);
-					skippedDomNodes.push(step.domNode);
-				}
-			} else {
-				// exiting
-				if (skippedDomNodes.indexOf(step.domNode) < 0) {
-					current = parent;
-					parent = current.parent;
-				}
-			}
-		}
-
-		return current;
+		let conversion = AbstractNodeConversion.parse(walker.next(), walker);
+		return conversion.execute();
 	}
-
-
 }
