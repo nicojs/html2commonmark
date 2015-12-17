@@ -15,7 +15,7 @@ describe('CommonMark => html', () => {
 			scoped.push(i);
 		}
 	}
-	scoped = [1]; //489
+	// scoped = [1]; //489
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, () => {
 			let result = sut.parse(test.html);
