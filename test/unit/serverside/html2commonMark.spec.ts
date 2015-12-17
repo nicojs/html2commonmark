@@ -15,17 +15,11 @@ describe('CommonMark => html', () => {
 			scoped.push(i);
 		}
 	}
-	// scoped = [104]; //489
+	scoped = [1]; //489
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
-		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, (done) => {
-			sut.parse(test.html).then(result => {
-				try {
-					commonMarkUtils.assertEqual(parser.parse(test.markdown), result, false);
-					done();
-				} catch (error) {
-					done(error);
-				}
-			}, done);
+		it(`test #${test.example}, section ${test.section}: "${test.html }" ==> "${test.markdown}"`, () => {
+			let result = sut.parse(test.html);
+			commonMarkUtils.assertEqual(parser.parse(test.markdown), result, false);
 		});
 	});
 });

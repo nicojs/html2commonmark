@@ -5,24 +5,10 @@ import convert = require('./NodeConversions');
 
 export = class Parser {
 
-	parse(html: string): Promise<any> {
-		let deferred: any;
-		let p = new Promise<any>((resolve, error) => {
-			deferred = {
-				resolve: resolve,
-				error: error
-			}
-		});
+	parse(html: string): commonmark.Node {
 		html = html.trim();
-
-		jsdom.env( html, {features: {FetchExternalResources: false, ProcessExternalResources: false }}, (error, window) => {
-			if (error) {
-				deferred.error(error);
-			} else {
-				deferred.resolve(window.document.body);
-			}
-		});
-		return p.then(node => this.parseDomNode(node), deferred.error);
+		let document = jsdom.jsdom( html, {features: {FetchExternalResources: false, ProcessExternalResources: false }}).defaultView.document;
+		return this.parseDomNode(document.body);		
 	}
 	
 	parseDomNode(htmlNode: Node): commonmark.Node {
