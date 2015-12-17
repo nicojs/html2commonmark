@@ -1,7 +1,7 @@
 import jsdom = require('jsdom');
 import DomWalker = require('./DomWalker');
 import commonmark = require('commonmark');
-import AbstractNodeConversion = require('./NodeConversion');
+import convert = require('./NodeConversions');
 
 export = class Parser {
 
@@ -27,7 +27,7 @@ export = class Parser {
 	
 	parseDomNode(htmlNode: Node): commonmark.Node {
 		let walker = new DomWalker(htmlNode);
-		let conversion = AbstractNodeConversion.parse(walker.next(), walker);
+		let conversion = convert(walker.next(), walker);
 		return conversion.execute();
 	}
 }

@@ -7,6 +7,55 @@ interface NodeConversion {
 	execute(container?: commonmark.Node): commonmark.Node;
 }
 
+function convert(currentStep: WalkingStep, domWalker: DomWalker): NodeConversion {
+	switch (currentStep.domNode.nodeName.toLowerCase()) {
+		case 'a':
+			return new LinkConversion(currentStep.domNode, domWalker);
+		case 'br':
+			return new NamedContainerConversion('Hardbreak', domWalker);
+		case 'body':
+			return new NamedContainerConversion('Document', domWalker);
+		case 'pre':
+			return new NamedContainerConversion('CodeBlock', domWalker);
+		case 'code':
+			return new CodeBlockConversion(currentStep.domNode, domWalker);
+		case 'img':
+			return new ImageConversion(currentStep.domNode, domWalker);
+		case 'ul':
+		case 'ol':
+			return new ListConversion(currentStep.domNode, domWalker);
+		case 'li':
+			return new NamedContainerConversion('Item', domWalker);
+		case 'p':
+			return new NamedContainerConversion('Paragraph', domWalker);
+		case 'hr':
+			return new NamedContainerConversion('HorizontalRule', domWalker);
+		case '#text':
+			return new TextConversion(currentStep.domNode, domWalker);
+		case 'blockquote':
+			return new NamedContainerConversion('BlockQuote', domWalker);
+		case 'i':
+		case 'em':
+			return new InlineConversion('Emph', domWalker);
+		case 'b':
+		case 'strong':
+			return new InlineConversion('Strong', domWalker);
+		case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': case 'h7': case 'h8': case 'h9':
+			return new HeaderConversion(parseInt(currentStep.domNode.nodeName.substr(1)), domWalker);
+		case 'address': case 'article': case 'aside': case 'base': case 'basefont': 
+			/*case 'blockquote': case 'body':*/ case 'caption': case 'center': case 'col': case 'colgroup':
+		case 'dd': case 'details': case 'dialog': case 'dir': case 'div': case 'dl': case 'dt':
+		case 'fieldset': case 'figcaption': case 'figure': case 'footer': case 'form': case 'frame':
+		case 'frameset': /*case 'h1':*/ case 'head': case 'header': /*case 'hr':*/ case 'html':
+		case 'iframe': case 'legend': /*case 'li':*/ case 'link': case 'main': case 'menu':
+		case 'menuitem': case 'meta': case 'nav': case 'noframes': /*case 'ol':*/ case 'optgroup': case 'option': 
+			/*case 'p':*/ case 'param': case 'section': case 'source': case 'summary': case 'table': case 'tbody':
+		case 'td': case 'tfoot': case 'th': case 'thead': case 'title': case 'tr': case 'track': /*case 'ul':*/
+		default:
+			return new RawHtmlConversion(currentStep.domNode, domWalker);
+	}
+}
+
 abstract class AbstractNodeConversion implements NodeConversion {
 
 	protected children: Array<NodeConversion>;
@@ -15,61 +64,11 @@ abstract class AbstractNodeConversion implements NodeConversion {
 		this.children = [];
 		let next: WalkingStep;
 		while ((next = domWalker.next()).isEntering) {
-			this.children.push(AbstractNodeConversion.parse(next, domWalker));
+			this.children.push(convert(next, domWalker));
 		}
 	}
 
 	public abstract execute(container?: commonmark.Node): commonmark.Node;
-
-	public static parse(currentStep: WalkingStep, domWalker: DomWalker): NodeConversion {
-
-		switch (currentStep.domNode.nodeName.toLowerCase()) {
-			case 'a':
-				return new LinkConversion(currentStep.domNode, domWalker);
-			case 'br':
-				return new NamedContainerConversion('Hardbreak', domWalker);
-			case 'body':
-				return new NamedContainerConversion('Document', domWalker);
-			case 'pre':
-				return new NamedContainerConversion('CodeBlock', domWalker);
-			case 'code':
-				return new CodeBlockConversion(currentStep.domNode, domWalker);
-			case 'img':
-				return new ImageConversion(currentStep.domNode, domWalker);
-			case 'ul':
-			case 'ol':
-				return new ListConversion(currentStep.domNode, domWalker);
-			case 'li':
-				return new NamedContainerConversion('Item', domWalker);
-			case 'p':
-				return new NamedContainerConversion('Paragraph', domWalker);
-			case 'hr':
-				return new NamedContainerConversion('HorizontalRule', domWalker);
-			case '#text':
-				return new TextConversion(currentStep.domNode, domWalker);
-			case 'blockquote':
-				return new NamedContainerConversion('BlockQuote', domWalker);
-			case 'i':
-			case 'em':
-				return new InlineConversion('Emph', domWalker);
-			case 'b':
-			case 'strong':
-				return new InlineConversion('Strong', domWalker);
-			case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': case 'h7': case 'h8': case 'h9':
-				return new HeaderConversion(parseInt(currentStep.domNode.nodeName.substr(1)), domWalker);
-			case 'address': case 'article': case 'aside': case 'base': case 'basefont': 
-			/*case 'blockquote': case 'body':*/ case 'caption': case 'center': case 'col': case 'colgroup':
-			case 'dd': case 'details': case 'dialog': case 'dir': case 'div': case 'dl': case 'dt':
-			case 'fieldset': case 'figcaption': case 'figure': case 'footer': case 'form': case 'frame':
-			case 'frameset': /*case 'h1':*/ case 'head': case 'header': /*case 'hr':*/ case 'html':
-			case 'iframe': case 'legend': /*case 'li':*/ case 'link': case 'main': case 'menu':
-			case 'menuitem': case 'meta': case 'nav': case 'noframes': /*case 'ol':*/ case 'optgroup': case 'option': 
-			/*case 'p':*/ case 'param': case 'section': case 'source': case 'summary': case 'table': case 'tbody':
-			case 'td': case 'tfoot': case 'th': case 'thead': case 'title': case 'tr': case 'track': /*case 'ul':*/
-			default:
-				return new RawHtmlConversion(currentStep.domNode, domWalker);
-		}
-	}
 }
 
 class NamedContainerConversion extends AbstractNodeConversion {
@@ -338,7 +337,7 @@ class RawHtmlConversion implements NodeConversion {
 		}
 		return this.htmlBlock;
 	}
-	
+
 	private createNode(nodeName: string, literal: string = null) {
 		let node = new commonmark.Node(nodeName);
 		node.literal = literal;
@@ -347,4 +346,4 @@ class RawHtmlConversion implements NodeConversion {
 
 }
 
-export = AbstractNodeConversion;
+export = convert;
