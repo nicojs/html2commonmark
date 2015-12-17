@@ -1,4 +1,4 @@
-    import jsdom = require('jsdom');
+import jsdom = require('jsdom');
 import * as commonmark from 'commonmark';
 
 class DomWalker {

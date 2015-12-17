@@ -56,6 +56,26 @@ declare module commonmark {
        constructor(options?: any);
        parse(input: string): Node;
     }
+    
+    export interface HtmlRenderingOptions extends XmlRenderingOptions{
+        safe: boolean;
+        
+    }
+    
+    export class HtmlRenderer{
+        constructor(options?: HtmlRenderingOptions)
+        render(root: Node): string;
+    }
+    
+    export interface XmlRenderingOptions{
+        time?: boolean;
+        sourcepos?: boolean;
+    }
+    
+    export class XmlRenderer{
+        constructor(options?: XmlRenderingOptions)
+        render(root: Node): string;
+    }
 
 }
 
