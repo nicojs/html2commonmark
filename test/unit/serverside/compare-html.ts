@@ -8,9 +8,14 @@ function wrapInDocument(htmlFragment: string){
 	return `<html><body>${htmlFragment}</body></html>`;
 }
 
-export = (expectedHtml: string, actualHtml: string) => {
+export = (expectedHtml: string, actualHtml: string, logInfo?: boolean) => {
 	let expectedBody = jsdom.jsdom(wrapInDocument(expectedHtml)).defaultView.document.body;
 	let actualBody = jsdom.jsdom(wrapInDocument(actualHtml)).defaultView.document.body;
+	if(logInfo){
+		console.log('Expected: ', expectedBody.outerHTML);
+		console.log('Actual: ', expectedBody.outerHTML);
+	}
+	
 	let result = compare(expectedBody, actualBody, {compareComments: true, stripSpaces: true});
 	let diff: string;
 	if (!result.getResult()) {

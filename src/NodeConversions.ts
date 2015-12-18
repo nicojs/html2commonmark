@@ -346,10 +346,13 @@ class RawHtmlConversion extends AbstractNodeConversion {
 				return this.appendChildNode(container, nodeName, DomUtil.writeEndElement(rawHtmlNode));
 			}
 		} else if (DomUtil.isComment(rawHtmlNode)) {
-			return this.appendChildNode(container, 'Html', '<!--' + rawHtmlNode.data + '-->');
+			return this.appendChildNode(container, 'HtmlBlock', '<!--' + rawHtmlNode.data + '-->');
 		} else if (DomUtil.isText(rawHtmlNode)) {
 			return this.appendChildNode(container, 'Html', rawHtmlNode.textContent);
-		} else {
+		}else if(DomUtil.isProcessingInstruction(rawHtmlNode)){
+			return this.appendChildNode(container, 'HtmlBlock', '<?' + rawHtmlNode.data + '?>');
+		}
+		 else {
 			return null;
 		}
 	}

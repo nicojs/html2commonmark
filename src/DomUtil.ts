@@ -20,12 +20,17 @@ export = class NodeUtil {
 	public static isText(domNode: Node): domNode is Text{
 		return domNode.nodeType === domNode.TEXT_NODE;
 	}
+	
+	public static isProcessingInstruction(domNode: Node): domNode is ProcessingInstruction{
+		return domNode.nodeType === domNode.PROCESSING_INSTRUCTION_NODE;
+	}
+	
 
 	public static isInline(domNode: Node) {
 		if (domNode) {
 			return domNode.nodeType === domNode.TEXT_NODE ||
 				domNode.nodeType === domNode.COMMENT_NODE ||
-				(domNode.nodeType === domNode.ELEMENT_NODE && NodeUtil.BLOCK_LEVEL_HTML_NODES.indexOf(domNode.nodeName.toLowerCase()) < 0);
+				(domNode.nodeType === domNode.ELEMENT_NODE && (NodeUtil.BLOCK_LEVEL_HTML_NODES.indexOf(domNode.nodeName.toLowerCase()) < 0));
 		} else {
 			return false;
 		}

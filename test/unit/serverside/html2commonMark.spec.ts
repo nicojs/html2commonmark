@@ -7,35 +7,40 @@ import compareHtml = require('./compare-html');
 let sut = new Parser();
 let parser = new commonmark.Parser();
 var htmlWriter = new commonmark.HtmlRenderer();
-
-interface Html2MarkdownConversionOptionsWithAssertionOptions extends Html2MarkdownConversionOptions {
-	assertionOptions?: compareMD.CompareOptions;
-}
-
 let optionMap: {
-	[index: number]: Html2MarkdownConversionOptionsWithAssertionOptions;
+	[index: number]: Html2MarkdownConversionOptions;
 } = [];
 
+var oneLine = (line: string) => line.replace(/(\r\n|\n|\r)/gm, "\\n");
 
 // More raw html nodes needed for these examples:
-optionMap[104] = { rawHtmlElements: ['table', 'tbody', 'tr', 'td'] };
-optionMap[105] = optionMap[110] =  { rawHtmlElements: ['#text', 'a', 'div'], };
-optionMap[111] = optionMap[112] = optionMap[114] = optionMap[117] = { rawHtmlElements: ['div', 'a'] };
-optionMap[119] = { rawHtmlElements: ['i'] };
-optionMap[124] = { rawHtmlElements: ['pre', 'code'] };
-
-// Html blocks section Rule 7
-optionMap[123] = optionMap[477] = optionMap[489] = { assertionOptions: { useHtmlAliases: true } };
+function setRawHtmlElements(examples: Array<number>, rawHtmlElements: Array<string>) {
+	examples.forEach(n => {
+		if (!optionMap[n]) {
+			optionMap[n] = {};
+		}
+		optionMap[n].rawHtmlElements = rawHtmlElements;
+	});
+}
+setRawHtmlElements([104], ['table', 'tbody', 'tr', 'td']);
+setRawHtmlElements([105, 110], ['#text', 'a', 'div']);
+setRawHtmlElements([111, 112, 114, 117], ['div', 'a']);
+setRawHtmlElements([124], ['pre', 'code']);
+setRawHtmlElements([141, 282, 292, 308, 437, 436, 559, 560, 561, 562, 577, 578, 589, 590], ['a']);
+setRawHtmlElements([104], ['table', 'tbody', 'tr', 'td']);
+setRawHtmlElements([119], ['i']);
+setRawHtmlElements([435], ['img']);
 
 // Some information during html parsing gets lost. For example: with not well-formed html
 // For those examples we will not do a strict comparison of the abstract syntax tree, instead, we validate
 // that the html we get back get's parsed the same way
-var examplesOfWhichOnlyCompareHtmlResult = [106, 110, 111, 112, 120, 116];
+var examplesOfWhichOnlyCompareHtmlResult = [106, 110, 111, 112, 120, 116, 134, 135, 137, 138, 141, 145, 286, 562, 569, 571, 574, 575];
 
-var oneLine = (line: string) => line.replace(/(\r\n|\n|\r)/gm, "\\n");
+// Too bad! These examples cannot be implemented with current parsing strategy
+var excluded = [141, 562];
 
 describe('CommonMark => html', () => {
-	var excluded = [129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 282, 286, 292, 308, 435, 436, 437, 449, 559, 559, 560, 561, 562, 563, 569, 576 /* jsdom has trouble parsing CDATA tags */, 577, 578, 589, 590];
+	
 	var excludedSections = [];
 	var scoped: Array<number> = [];
 	for (var i = 0; i < 600; i++) {
@@ -43,7 +48,6 @@ describe('CommonMark => html', () => {
 			scoped.push(i);
 		}
 	}
-	// scoped = [116];
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		var compareHtmlOnly = examplesOfWhichOnlyCompareHtmlResult.indexOf(test.example) >= 0;
 		it(`test #${test.example}, section ${test.section}:\n(html:) ${oneLine(test.html) }\n(md:)   ${oneLine(test.markdown) }${compareHtmlOnly ? '\n(html:) ' + oneLine(test.html) : ''}`, () => {
@@ -54,13 +58,7 @@ describe('CommonMark => html', () => {
 				let actualHtml = htmlWriter.render(actualAst);
 				compareHtml(expectedHtml, actualHtml);
 			} else {
-				let assertionOptions;
-				if (optionMap[test.example]) {
-					assertionOptions = optionMap[test.example].assertionOptions;
-				}
-				// assertionOptions = assertionOptions || {};
-				// assertionOptions.logInfo = true;
-				compareMD.assertEqualTrees(expectedAst, actualAst, assertionOptions);
+				compareMD.assertEqualTrees(expectedAst, actualAst, false);
 			}
 		});
 	});
