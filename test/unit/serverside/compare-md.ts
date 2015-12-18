@@ -3,8 +3,9 @@ import chai = require('chai');
 import compareHtml = require('./compare-html');
 let expect = chai.expect;
 
-interface CompareOptions { loseHtmlCompare?: boolean, logInfo?: boolean };
-export = function assertEqual(astExpected: commonmark.Node, astActual: commonmark.Node, options?: CompareOptions) {
+export interface CompareOptions { useHtmlAliases?: boolean, logInfo?: boolean,  };
+
+export function assertEqualTrees(astExpected: commonmark.Node, astActual: commonmark.Node, options?: CompareOptions) {
 	options = overrideDefaults(options);
 	astExpected = normalizeTree(astExpected);
 	astActual = normalizeTree(astActual);
@@ -25,7 +26,7 @@ export = function assertEqual(astExpected: commonmark.Node, astActual: commonmar
 		['level', 'title', 'destination'].forEach
 			(prop => expect(actualValue.node[prop], `comparing ${prop} of ${expectedValue.node.type}`).to.be.equal(expectedValue.node[prop]));
 
-		assertType(expectedValue.node, actualValue.node, options.loseHtmlCompare);
+		assertType(expectedValue.node, actualValue.node, options.useHtmlAliases);
 		assertLiteral(expectedValue.node, actualValue.node);
 		assertInfo(expectedValue.node, actualValue.node);
 
@@ -103,7 +104,7 @@ function normalizeImageNodes(currentNode: commonmark.Node, walker: commonmark.No
 }
 
 function overrideDefaults(overrides: CompareOptions) {
-	var options: CompareOptions = { logInfo: false, loseHtmlCompare: false };
+	var options: CompareOptions = { logInfo: false, useHtmlAliases: false };
 	Object.keys(overrides || {}).forEach(key => options[key] = overrides[key]);
 	return options;
 }

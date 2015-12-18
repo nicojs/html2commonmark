@@ -27,6 +27,14 @@ class DomWalker {
             return null;
         }
         this.moveNext(current, isEntering);
+
+        // if (DomUtil.isElement(current)) {
+        //     if (isEntering) {
+        //         console.log(DomUtil.writeStartElement(current));
+        //     } else {
+        //         console.log(DomUtil.writeEndElement(current));
+        //     }
+        // }
         return { isEntering: isEntering, domNode: current };
     }
 

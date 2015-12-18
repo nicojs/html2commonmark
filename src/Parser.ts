@@ -7,7 +7,7 @@ export = class Parser {
 
 	parse(html: string, options?: Html2MarkdownConversionOptions): commonmark.Node {
 		html = html.trim();
-		let document = jsdom.jsdom(html, { features: { FetchExternalResources: false, ProcessExternalResources: false } }).defaultView.document;
+		let document = jsdom.jsdom(`<html><body>${html}</body></html>`, { features: { FetchExternalResources: false, ProcessExternalResources: false } }).defaultView.document;
 		return this.parseDomNode(document.body, options);
 	}
 
