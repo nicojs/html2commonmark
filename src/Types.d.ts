@@ -8,5 +8,7 @@ interface NodeConversion {
 }
 
 interface Html2MarkdownConversionOptions {
-	
+	rawHtmlElements?: Array<string>;
+	ignoredHtmlElements?: Array<string>;
+	interpretUnknownHtml?: boolean;
 }

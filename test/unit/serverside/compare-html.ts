@@ -11,7 +11,7 @@ function wrapInDocument(htmlFragment: string){
 export = (expectedHtml: string, actualHtml: string) => {
 	let expectedBody = jsdom.jsdom(wrapInDocument(expectedHtml)).defaultView.document.body;
 	let actualBody = jsdom.jsdom(wrapInDocument(actualHtml)).defaultView.document.body;
-	let result = compare(expectedBody, actualBody, {compareComments: true});
+	let result = compare(expectedBody, actualBody, {compareComments: true, stripSpaces: true});
 	let diff: string;
 	if (!result.getResult()) {
 		diff = `Expect: ${actualBody.outerHTML} to be: ${expectedBody.outerHTML}. `;

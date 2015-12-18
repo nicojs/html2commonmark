@@ -1,5 +1,6 @@
 import jsdom = require('jsdom');
 import * as commonmark from 'commonmark';
+import DomUtil = require('./DomUtil');
 
 class DomWalker {
     current: Node;
@@ -26,11 +27,10 @@ class DomWalker {
             return null;
         }
         this.moveNext(current, isEntering);
-                
         return { isEntering: isEntering, domNode: current };
     }
-    
-    private moveNext(previous: Node, wasEntering: boolean){
+
+    private moveNext(previous: Node, wasEntering: boolean) {
         if (wasEntering) {
             if (previous.childNodes.length > 0) {
                 this.current = previous.childNodes.item(0);
@@ -40,10 +40,10 @@ class DomWalker {
             }
         } else if (previous === this.root) {
             this.current = null;
-        }else if (!previous.nextSibling) {
+        } else if (!previous.nextSibling) {
             this.current = previous.parentNode;
             this.isEntering = false;
-        }else {
+        } else {
             this.current = previous.nextSibling;
             this.isEntering = true;
         }

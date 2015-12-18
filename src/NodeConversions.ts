@@ -4,13 +4,20 @@ import DomUtil = require('./DomUtil');
 import MarkdownUtil = require('./MarkdownUtil');
 
 
-interface ConversionState{
+interface ConversionState {
 	domWalker: DomWalker;
 	options: Html2MarkdownConversionOptions;
 }
 
 function convert(domNode: Node, state: ConversionState): NodeConversion {
-	switch (domNode.nodeName.toLowerCase()) {
+	let nodeName = domNode.nodeName.toLowerCase();
+	if (state.options.rawHtmlElements.indexOf(nodeName) >= 0) {
+		return new RawHtmlConversion(state, domNode);
+	}
+	if (state.options.ignoredHtmlElements.indexOf(nodeName) >= 0) {
+		return new NoopConversion(state)
+	}
+	switch (nodeName) {
 		case 'a':
 			return new LinkConversion(state, domNode);
 		case 'br':
@@ -54,7 +61,12 @@ function convert(domNode: Node, state: ConversionState): NodeConversion {
 			/*case 'p':*/ case 'param': case 'section': case 'source': case 'summary': case 'table': case 'tbody':
 		case 'td': case 'tfoot': case 'th': case 'thead': case 'title': case 'tr': case 'track': /*case 'ul':*/
 		default:
-			return new RawHtmlConversion(state, domNode);
+			if (state.options.interpretUnknownHtml) {
+				return new RawHtmlConversion(state, domNode);
+			} else {
+				console.log(`No conversion specified for html element ${nodeName}, ignoring it by default.`);
+				return new NoopConversion(state);
+			}
 	}
 }
 
@@ -71,6 +83,12 @@ abstract class AbstractNodeConversion implements NodeConversion {
 	}
 
 	public abstract execute(container?: commonmark.Node): commonmark.Node;
+}
+
+class NoopConversion extends AbstractNodeConversion {
+	public execute(container: commonmark.Node) {
+		return this.children.map(c => c.execute(container)).pop();
+	}
 }
 
 class NamedContainerConversion extends AbstractNodeConversion {
@@ -307,46 +325,47 @@ class CodeBlockConversion extends AbstractNodeConversion {
 	}
 }
 
-class RawHtmlConversion implements NodeConversion {
+class RawHtmlConversion extends AbstractNodeConversion {
 
-	private htmlBlock: commonmark.Node;
-
-	public constructor(state: ConversionState, rawHtmlNode: Node) {
-		if (DomUtil.isElement(rawHtmlNode)) {
-			let domWalker = state.domWalker;
-			let step = domWalker.current;
-			let isInline: boolean;
-			do {
-				isInline = DomUtil.isInline(step);
-			} while (isInline && (step = domWalker.next().domNode) !== rawHtmlNode);
-
-			let nodeName = 'HtmlBlock';
-			if (isInline) {
-				nodeName = 'Html';
-			}
-			this.htmlBlock = this.createNode(nodeName, rawHtmlNode.outerHTML)
-			
-			// leave current node immediately
-			domWalker.resumeAt(rawHtmlNode, false);
-			domWalker.next();
-		} else if (DomUtil.isComment(rawHtmlNode)) {
-			this.htmlBlock = this.createNode('Html', '<!--' + rawHtmlNode.data + '-->');
-		}
+	public constructor(state: ConversionState, private rawHtmlNode: Node) {
+		super(state);
 	}
 
 	public execute(container?: commonmark.Node) {
-		if (this.htmlBlock) {
-			container.appendChild(this.htmlBlock);
+		let rawHtmlNode = this.rawHtmlNode;
+		if (DomUtil.isElement(rawHtmlNode)) {
+			let nodeName = 'HtmlBlock';
+			if (this.hasInlineContent()) {
+				nodeName = 'Html';
+			}
+			this.appendChildNode(container, nodeName, DomUtil.writeStartElement(rawHtmlNode));
+			this.children.forEach(c => c.execute(container));
+			return this.appendChildNode(container, nodeName, DomUtil.writeEndElement(rawHtmlNode));
+		} else if (DomUtil.isComment(rawHtmlNode)) {
+			return this.appendChildNode(container, 'Html', '<!--' + rawHtmlNode.data + '-->');
+		} else if (DomUtil.isText(rawHtmlNode)) {
+			return this.appendChildNode(container, 'Html', rawHtmlNode.textContent);
+		} else {
+			return null;
 		}
-		return this.htmlBlock;
 	}
 
-	private createNode(nodeName: string, literal: string = null) {
+	private appendChildNode(container: commonmark.Node, nodeName: string, literal: string = null) {
 		let node = new commonmark.Node(nodeName);
 		node.literal = literal;
+		container.appendChild(node);
 		return node;
 	}
 
+	private hasInlineContent() {
+		let domElement = this.rawHtmlNode;
+		let walker = new DomWalker(this.rawHtmlNode);
+		let isInline: boolean;
+		do {
+			isInline = DomUtil.isInline(domElement);
+		} while (isInline && (domElement = walker.next().domNode) !== this.rawHtmlNode);
+
+	}
 }
 
 export = convert;

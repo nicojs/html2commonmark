@@ -3,25 +3,29 @@ import chai = require('chai');
 import compareHtml = require('./compare-html');
 let expect = chai.expect;
 
-export function assertEqual(astExpected: commonmark.Node, astActual: commonmark.Node, logInfo?: boolean) {
+interface CompareOptions { loseHtmlCompare?: boolean, logInfo?: boolean };
+export = function assertEqual(astExpected: commonmark.Node, astActual: commonmark.Node, options?: CompareOptions) {
+	options = overrideDefaults(options);
 	astExpected = normalizeTree(astExpected);
+	astActual = normalizeTree(astActual);
 	let expectedWalker = astExpected.walker();
 	let actualWalker = astActual.walker();
 	let expectedValue: commonmark.WalkingStep;
 
-	if (logInfo) {
+	if (options.logInfo) {
 		console.log('expected: ', new commonmark.XmlRenderer().render(astExpected));
 		console.log('actual: ', new commonmark.XmlRenderer().render(astActual));
 	}
 	while (expectedValue = expectedWalker.next()) {
 		var actualValue = actualWalker.next();
-		if (logInfo) {
+		if (options.logInfo) {
 			console.log(`verifying that: ${actualValue.node.type }/${actualValue.node.literal} is ${expectedValue.node.type}/${expectedValue.node.literal}`);
 		}
 		expect(actualValue).to.be.ok;
-		['type', 'level', 'title', 'destination'].forEach
+		['level', 'title', 'destination'].forEach
 			(prop => expect(actualValue.node[prop], `comparing ${prop} of ${expectedValue.node.type}`).to.be.equal(expectedValue.node[prop]));
 
+		assertType(expectedValue.node, actualValue.node, options.loseHtmlCompare);
 		assertLiteral(expectedValue.node, actualValue.node);
 		assertInfo(expectedValue.node, actualValue.node);
 
@@ -39,21 +43,40 @@ function normalizeTree(root: commonmark.Node) {
 		let currentNode = current.node;
 		normalizeTextNodes(currentNode, walker);
 		normalizeImageNodes(currentNode, walker);
+		normalizeHtmlNodes(currentNode, walker);
 	}
 	return root;
 }
 
 function normalizeTextNodes(currentNode: commonmark.Node, walker: commonmark.NodeWalker) {
 	if (currentNode.type === 'Text' && currentNode.next && currentNode.next.type === 'Text') {
-		let newNode = new commonmark.Node('Text');
-		currentNode.parent.appendChild(newNode);
-		newNode.literal = currentNode.literal + currentNode.next.literal;
-		currentNode.insertBefore(newNode);
-		currentNode.next.unlink();
-		currentNode.unlink();
-		walker.resumeAt(newNode);
+		mergeNodes('Text', currentNode, currentNode.next, walker);
 	}
 }
+
+function isHtml(node: commonmark.Node) {
+	return node && (node.type === 'Html' || node.type === 'HtmlBlock');
+}
+
+function normalizeHtmlNodes(currentNode: commonmark.Node, walker: commonmark.NodeWalker) {
+	function isText(node: commonmark.Node) {
+		return node && node.type === 'Text';
+	}
+	if (isHtml(currentNode) && (isHtml(currentNode.next) || isText(currentNode.next))) {
+		mergeNodes(currentNode.next.type === 'HtmlBlock' ? 'HtmlBlock' : currentNode.type, currentNode, currentNode.next, walker);
+	}
+}
+
+function mergeNodes(newNodeName: string, a: commonmark.Node, b: commonmark.Node, walker: commonmark.NodeWalker) {
+	let newNode = new commonmark.Node(newNodeName);
+	a.parent.appendChild(newNode);
+	newNode.literal = a.literal + a.next.literal;
+	a.insertBefore(newNode);
+	a.next.unlink();
+	a.unlink();
+	walker.resumeAt(newNode);
+}
+
 
 function normalizeImageNodes(currentNode: commonmark.Node, walker: commonmark.NodeWalker) {
 	if (currentNode.type === 'Image') {
@@ -79,12 +102,27 @@ function normalizeImageNodes(currentNode: commonmark.Node, walker: commonmark.No
 	}
 }
 
+function overrideDefaults(overrides: CompareOptions) {
+	var options: CompareOptions = { logInfo: false, loseHtmlCompare: false };
+	Object.keys(overrides || {}).forEach(key => options[key] = overrides[key]);
+	return options;
+}
+
 function assertLiteral(expecedValue: commonmark.Node, actualValue: commonmark.Node) {
 	if (expecedValue.type === 'HtmlBlock' || expecedValue.type === 'Html') {
 		// Compare the dom
 		compareHtml(expecedValue.literal, actualValue.literal);
 	} else {
 		expect(actualValue.literal, `comparing literal of ${expecedValue.type}`).to.be.equal(expecedValue.literal);
+	}
+}
+
+function assertType(expecedValue: commonmark.Node, actualValue: commonmark.Node, loseHtmlCompare: boolean) {
+	if (loseHtmlCompare && isHtml(expecedValue)) {
+		expect(isHtml(actualValue), `Type 'type' property was '${actualValue.type}' instead of 'Html' or 'HtmlBlock'`).
+			to.be.equal(true);
+	} else {
+		expect(actualValue.type, 'Comparing type property').to.be.equal(expecedValue.type);
 	}
 }
 
