@@ -53,6 +53,7 @@
     "mocha": "^2.3.4",
     "phantomjs": "^1.9.19",
     "ts-loader": "^0.7.2",
+    "typescript": "^1.7.5",
     "webpack": "^1.12.9",
     "webpack-dev-server": "^1.14.0"
   }
