@@ -9,6 +9,12 @@ interface ConversionState {
 	options: Html2MarkdownConversionOptions;
 }
 
+function converRoot(state: ConversionState): commonmark.Node{
+    let document = new commonmark.Node('Document');
+    convert(state.domWalker.next().domNode, state).execute(document);
+    return document;
+}
+
 function convert(domNode: Node, state: ConversionState): NodeConversion {
 	let nodeName = domNode.nodeName.toLowerCase();
 	if (state.options.rawHtmlElements.indexOf(nodeName) >= 0) {
@@ -376,4 +382,4 @@ class RawHtmlConversion extends AbstractNodeConversion {
 
 }
 
-export = convert;
+export = converRoot;

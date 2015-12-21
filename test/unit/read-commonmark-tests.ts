@@ -1,5 +1,3 @@
-/// <reference path="typings/tsd" />
-
 interface TestData {
 	html: string;
 	section: string;

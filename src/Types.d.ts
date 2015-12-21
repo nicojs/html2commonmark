@@ -4,7 +4,7 @@ interface WalkingStep {
 }
 
 interface NodeConversion {
-    execute(container?: commonmark.Node): commonmark.Node;
+    execute(container: commonmark.Node): commonmark.Node;
 }
 
 interface Html2MarkdownConversionOptions {

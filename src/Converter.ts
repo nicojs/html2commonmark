@@ -14,14 +14,14 @@ export = class Converter {
 	convertDomElement(htmlElement: HTMLElement, options?: Html2MarkdownConversionOptions): commonmark.Node {
 		options = this.overrideDefaults(options);
 		let walker = new DomWalker(htmlElement);
-		let conversion = convert(walker.next().domNode, { domWalker: walker, options: options });
-		return conversion.execute();
+		let conversion = convert({ domWalker: walker, options: options });
+		return conversion;
 	}
 
 	private overrideDefaults(overrides: Html2MarkdownConversionOptions) {
 		var currentOptions: Html2MarkdownConversionOptions = {
 			rawHtmlElements: ['div', 'table', 'td', 'tr', 'th', 'tbody', 'thead'],
-			ignoredHtmlElements: [],
+			ignoredHtmlElements: ['custom-root', 'body'],
 			interpretUnknownHtml: true,
 		};
 		Object.keys(overrides || {}).forEach(function(key) {
