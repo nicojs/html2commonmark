@@ -4,11 +4,15 @@ interface WalkingStep {
 }
 
 interface NodeConversion {
-	execute(container?: commonmark.Node): commonmark.Node;
+    execute(container?: commonmark.Node): commonmark.Node;
 }
 
 interface Html2MarkdownConversionOptions {
-	rawHtmlElements?: Array<string>;
-	ignoredHtmlElements?: Array<string>;
-	interpretUnknownHtml?: boolean;
+    rawHtmlElements?: Array<string>;
+    ignoredHtmlElements?: Array<string>;
+    interpretUnknownHtml?: boolean;
+}
+
+interface HtmlParser {
+    parse(html: string): HTMLElement;
 }

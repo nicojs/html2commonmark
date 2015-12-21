@@ -1,10 +1,12 @@
 import tests = require('./read-commonmark-tests');
-import Parser = require('../../../src/Parser');
+import Converter = require('../../../src/Converter');
 import commonmark = require('commonmark');
 import compareMD = require('./compare-md');
 import compareHtml = require('./compare-html');
+import JSDomParser = require('../../../src/JSDomParser');
 
-let sut = new Parser();
+let jsDomParser = new JSDomParser();
+let sut = new Converter(jsDomParser);
 let parser = new commonmark.Parser();
 var htmlWriter = new commonmark.HtmlRenderer();
 let optionMap: {
@@ -51,7 +53,7 @@ describe('CommonMark => html', () => {
 	tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
 		var compareHtmlOnly = examplesOfWhichOnlyCompareHtmlResult.indexOf(test.example) >= 0;
 		it(`test #${test.example}, section ${test.section}:\n(html:) ${oneLine(test.html) }\n(md:)   ${oneLine(test.markdown) }${compareHtmlOnly ? '\n(html:) ' + oneLine(test.html) : ''}`, () => {
-			let actualAst = sut.parse(test.html, optionMap[test.example]);
+			let actualAst = sut.convert(test.html, optionMap[test.example]);
 			let expectedAst = parser.parse(test.markdown);
 			if (compareHtmlOnly) {
 				let expectedHtml = htmlWriter.render(expectedAst);

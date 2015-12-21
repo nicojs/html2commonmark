@@ -1,19 +1,19 @@
-import jsdom = require('jsdom');
 import DomWalker = require('./DomWalker');
 import commonmark = require('commonmark');
 import convert = require('./NodeConversions');
 
-export = class Parser {
+export = class Converter {
 
-	parse(html: string, options?: Html2MarkdownConversionOptions): commonmark.Node {
+    constructor(private parser: HtmlParser){}
+
+	convert(html: string, options?: Html2MarkdownConversionOptions): commonmark.Node {
 		html = html.trim();
-		let document = jsdom.jsdom(`<html><body>${html}</body></html>`, { features: { FetchExternalResources: false, ProcessExternalResources: false } }).defaultView.document;
-		return this.parseDomNode(document.body, options);
+		return this.convertDomElement(this.parser.parse(html), options);
 	}
 
-	parseDomNode(htmlNode: Node, options?: Html2MarkdownConversionOptions): commonmark.Node {
+	convertDomElement(htmlElement: HTMLElement, options?: Html2MarkdownConversionOptions): commonmark.Node {
 		options = this.overrideDefaults(options);
-		let walker = new DomWalker(htmlNode);
+		let walker = new DomWalker(htmlElement);
 		let conversion = convert(walker.next().domNode, { domWalker: walker, options: options });
 		return conversion.execute();
 	}
