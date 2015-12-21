@@ -1,8 +1,8 @@
 {
   "name": "html2commonmark",
-  "version": "1.0.0",
-  "description": " Html coverter to CommonMark using commonmark.js ",
-  "main": "dist/html2commonmark.js",
+  "version": "0.0.2",
+  "description": "Html coverter to markdown using the commonmark.js reference implementation of the CommonMark spec.",
+  "main": "dist/server/JSDomConverter.js",
   "engines": {
     "node": ">=4"
   },
@@ -18,12 +18,19 @@
     "markdown",
     "html"
   ],
-  "author": "nicojs",
+  "author": {
+      "name": "Nico Jansen",
+      "email": "jansennico@gmail.com",
+      "url": "http://github.com/nicojs"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/nicojs/html2commonmark/issues"
   },
   "homepage": "https://github.com/nicojs/html2commonmark#readme",
+  "files": [
+      "dist/"
+  ],
   "dependencies": {
     "commonmark": "^0.22.1",
     "jsdom": "^7.1.0"
