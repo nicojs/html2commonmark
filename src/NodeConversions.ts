@@ -6,7 +6,7 @@ import MarkdownUtil = require('./MarkdownUtil');
 
 interface ConversionState {
     domWalker: DomWalker;
-    options: Html2MarkdownConversionOptions;
+    options: Html2AstOptions;
 }
 
 function converRoot(state: ConversionState): commonmark.Node {

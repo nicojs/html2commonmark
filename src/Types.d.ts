@@ -7,10 +7,13 @@ interface NodeConversion {
     execute(container: commonmark.Node): commonmark.Node;
 }
 
-interface Html2MarkdownConversionOptions {
+interface Html2AstOptions {
     rawHtmlElements?: Array<string>;
     ignoredHtmlElements?: Array<string>;
     interpretUnknownHtml?: boolean;
+}
+
+interface Ast2MarkdownOptions{
     preserveSoftbreaks?: boolean;
     preserveHardbreaks?: boolean;
 }

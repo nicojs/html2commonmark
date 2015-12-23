@@ -1,10 +1,10 @@
 import tests = require('./read-commonmark-tests');
-import Converter = require('../../src/Converter');
+import MarkdownRenderer = require('../../src/MarkdownRenderer');
 import commonmark = require('commonmark');
 import compareMD = require('./compare-md');
 
 export = (description: string, htmlParser: HtmlParser) => {
-    let sut = new Converter(null);
+    let sut = new MarkdownRenderer();
     let commonmarkParser = new commonmark.Parser();
     let xmlWriter = new commonmark.XmlRenderer();
     

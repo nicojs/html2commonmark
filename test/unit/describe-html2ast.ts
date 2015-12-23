@@ -9,7 +9,7 @@ export = (description: string, htmlParser: HtmlParser) => {
     let commonmarkParser = new commonmark.Parser();
     var htmlWriter = new commonmark.HtmlRenderer();
     let optionMap: {
-        [index: number]: Html2MarkdownConversionOptions;
+        [index: number]: Html2AstOptions;
     } = [];
 
     var oneLine = (line: string) => line.replace(/(\r\n|\n|\r)/gm, "\\n");
