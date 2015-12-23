@@ -11,6 +11,7 @@ interface Html2MarkdownConversionOptions {
     rawHtmlElements?: Array<string>;
     ignoredHtmlElements?: Array<string>;
     interpretUnknownHtml?: boolean;
+    preserveSoftbreaks?: boolean;
 }
 
 interface HtmlParser {

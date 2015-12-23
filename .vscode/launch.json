@@ -17,7 +17,7 @@
 				"NODE_ENV": "development"
 			},
 			"externalConsole": false,
-			"sourceMaps": true,
+			"sourceMaps": false,
 			"outDir": ".tmp"
 		},
 		{

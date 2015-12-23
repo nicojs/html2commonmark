@@ -40,8 +40,8 @@ declare module commonmark {
         info: any;
         level: number;
         listType: any;
-        listTight: any;
-        listStart: any;
+        listTight: boolean;
+        listStart: number;
         listDelimiter: any;
         appendChild(child: Node): void;
         prependChild(child: Node): void;
