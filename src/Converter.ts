@@ -31,7 +31,8 @@ export = class Converter {
             rawHtmlElements: ['div', 'table', 'td', 'tr', 'th', 'tbody', 'thead'],
             ignoredHtmlElements: ['custom-root', 'body'],
             interpretUnknownHtml: true,
-            preserveSoftbreaks: true
+            preserveSoftbreaks: true,
+            preserveHardbreaks: true
         };
         Object.keys(overrides || {}).forEach(function(key) {
             currentOptions[key] = overrides[key];

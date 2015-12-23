@@ -37,12 +37,12 @@ declare module commonmark {
         literal: string;
         destination: string;
         title: string;
-        info: any;
+        info: string;
         level: number;
-        listType: any;
+        listType: string;
         listTight: boolean;
         listStart: number;
-        listDelimiter: any;
+        listDelimiter: string;
         appendChild(child: Node): void;
         prependChild(child: Node): void;
         unlink(): void;

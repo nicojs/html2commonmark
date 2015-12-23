@@ -2,7 +2,6 @@ import Escaping = require('./Escaping');
 import ListType = require('./ListType');
 import Utf8 = require('./Utf8');
 import CommonmarkEvent = require('./CommonmarkEvent');
-import CommonmarkDelimiterType = require('./CommonmarkDelimiterType');
 
 class Renderer {
 
@@ -22,8 +21,8 @@ class Renderer {
         this.buffer += c;
         this.column++;
     }
-    
-    truncatePrefix(length: number){
+
+    truncatePrefix(length: number) {
         this.prefix = this.prefix.substr(0, this.prefix.length - length);
     }
 
@@ -34,7 +33,6 @@ class Renderer {
     }
 
     cr() {
-        console.log('this.needrc:', this.need_cr);
         if (this.need_cr < 1) {
             this.need_cr = 1;
         }
@@ -155,6 +153,30 @@ class Renderer {
 
 
 
+    shortest_unused_backtick_sequence(code: string): number {
+        let used = 1;
+        let current = 0;
+        let i = 0;
+
+        while (i <= code.length) {
+            if (code[i] == '`') {
+                current++;
+            } else {
+                if (current) {
+                    used |= (1 << current);
+                }
+                current = 0;
+            }
+            i++;
+        }
+        // return number of first bit that is 0:
+        i = 0;
+        while (used & 1) {
+            used = used >> 1;
+            i++;
+        }
+        return i;
+    }
 
     public longest_backtick_sequence(code: string): number {
         let longest = 0;
@@ -220,11 +242,78 @@ class Renderer {
         }
     }
 
+    // Try to match a scheme including colon.
+    scan_scheme(url: string): string | boolean {
+        let schemeStart = url.indexOf(':');
+        if (schemeStart > -1) {
+            return url.substr(0, schemeStart);
+        } else {
+            return false;
+        }
+    }
+
+    cmark_consolidate_text_nodes(root: commonmark.Node): string | boolean {
+        let text = '';
+        let walker = root.walker();
+        let current: commonmark.WalkingStep;
+        walker.next();
+        while ((current = walker.next()) && current.node !== root) {
+            if (current.entering) {
+                let currentNode = current.node;
+                if (currentNode.type === 'Text' && currentNode.next && currentNode.next.type === 'Text') {
+                    text += currentNode.literal;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return text;
+    }
+
+    mergeNodes(newNodeName: string, a: commonmark.Node, b: commonmark.Node, walker: commonmark.NodeWalker) {
+        let newNode = new commonmark.Node(newNodeName);
+        a.parent.appendChild(newNode);
+        newNode.literal = a.literal + a.next.literal;
+        a.insertBefore(newNode);
+        a.next.unlink();
+        a.unlink();
+        walker.resumeAt(newNode);
+    }
+
+
+
+    is_autolink(node: commonmark.Node): boolean {
+        let title: string, url: string, linkText: commonmark.Node, realUrl: string;
+
+        url = node.destination;
+        if (url.length === 0 || this.scan_scheme(url)) {
+            return false;
+        }
+
+        title = node.title;
+        // if it has a title, we can't treat it as an autolink:
+        if (title.length > 0) {
+            return false;
+        }
+
+        linkText = node.firstChild;
+        let text = this.cmark_consolidate_text_nodes(linkText);
+        if (text !== false) {
+            realUrl = url;
+            if (realUrl.substr(0, 7) === 'mailto:') {
+                realUrl += 7;
+            }
+            return realUrl === text;
+        } else {
+            return false;
+        }
+    }
+
     S_render_node(node: commonmark.Node, entering: boolean) {
 
         let tmp: commonmark.Node;
         let listNumber: number;
-        let listDelimiter: CommonmarkDelimiterType;
+        let listDelimiter: string;
         let numtics: number;
         let i: number;
         let info: string;
@@ -289,8 +378,10 @@ class Renderer {
                     // we ensure a width of at least 4 so
                     // we get nice transition from single digits
                     // to double
-                    listmarker = listNumber.toString() + listDelimiter + listDelimiter;
-                    if(listNumber < 10){
+                    listmarker = listNumber.toString() + listDelimiter;
+                    if (listNumber < 10) {
+                        listmarker += '  ';
+                    } else {
                         listmarker += ' ';
                     }
                     marker_width = listmarker.length;
@@ -301,7 +392,7 @@ class Renderer {
                         this.prefix += "  ";
                     } else {
                         this.LIT(listmarker);
-                        for (i = marker_width; i--;) {
+                        for (i = marker_width; i > 0; i--) {
                             this.prefix += ' ';
                         }
                     }
@@ -332,13 +423,14 @@ class Renderer {
                 // use indented form if no info, and code doesn't
                 // begin or end with a blank line, and code isn't
                 // first thing in a list item
-                if (!info.length && code.length > 2 && !Utf8.isspace(code[0]) &&
+                if (!info.length &&
+                    (code.length > 2 && !Utf8.isspace(code[0])) &&
                     !(Utf8.isspace(code[code.length - 1]) && Utf8.isspace(code[code.length - 2])) &&
                     !(!node.prev && node.parent && node.parent.type == 'Item')) {
                     this.LIT("    ");
                     this.prefix += "    ";
                     this.out(code, false, Escaping.LITERAL);
-                    this.prefix = this.prefix.substr(0, this.prefix.length - 4);
+                    this.truncatePrefix(4);
                 } else {
                     let numticks = this.longest_backtick_sequence(code) + 1;
                     if (numticks < 3) {
@@ -359,18 +451,11 @@ class Renderer {
                 this.blankline();
                 break;
 
-            // case CMARK_NODE_HTML:
-            //     BLANKLINE();
-            //     OUT(cmark_node_get_literal(node), false, LITERAL);
-            //     BLANKLINE();
-            //     break;
-
-            // case CMARK_NODE_CUSTOM_BLOCK:
-            //     BLANKLINE();
-            //     OUT(entering ? cmark_node_get_on_enter(node) : cmark_node_get_on_exit(node),
-            //         false, LITERAL);
-            //     BLANKLINE();
-            //     break;
+            case 'HtmlBlock':
+                this.blankline();
+                this.out(node.literal, false, Escaping.LITERAL);
+                this.blankline();
+                break;
 
             case 'HorizontalRule':
                 this.blankline();
@@ -384,15 +469,15 @@ class Renderer {
                 }
                 break;
             case 'Text':
-                this.out(this.cmark_node_get_literal(node), true, Escaping.NORMAL);
+                this.out(this.cmark_node_get_literal(node), false, Escaping.NORMAL);
                 break;
 
-            // case CMARK_NODE_LINEBREAK:
-            //     if (!(CMARK_OPT_HARDBREAKS & options)) {
-            //         LIT("\\");
-            //     }
-            //     CR();
-            //     break;
+            case 'Hardbreak':
+                if (this.options.preserveHardbreaks) {
+                    this.LIT("\\");
+                }
+                this.cr();
+                break;
 
             case 'Softbreak':
                 if (this.width != 0 && this.options.preserveSoftbreaks) {
@@ -402,41 +487,35 @@ class Renderer {
                 }
                 break;
 
-            // case CMARK_NODE_CODE:
-            //     code = cmark_node_get_literal(node);
-            //     code_len = safe_strlen(code);
-            //     numticks = shortest_unused_backtick_sequence(code);
-            //     for (i = 0; i < numticks; i++) {
-            //         LIT("`");
-            //     }
-            //     if (code_len == 0 || code[0] == '`') {
-            //         LIT(" ");
-            //     }
-            //     OUT(cmark_node_get_literal(node), true, LITERAL);
-            //     if (code_len == 0 || code[code_len - 1] == '`') {
-            //         LIT(" ");
-            //     }
-            //     for (i = 0; i < numticks; i++) {
-            //         LIT("`");
-            //     }
-            //     break;
+            case 'Code':
+                code = node.literal;
+                let numticks = this.shortest_unused_backtick_sequence(code);
+                for (i = 0; i < numticks; i++) {
+                    this.LIT("`");
+                }
+                if (code.length == 0 || code[0] == '`') {
+                    this.LIT(" ");
+                }
+                this.out(code, true, Escaping.LITERAL);
+                if (code.length == 0 || code[code.length - 1] == '`') {
+                    this.LIT(" ");
+                }
+                for (i = 0; i < numticks; i++) {
+                    this.LIT("`");
+                }
+                break;
 
-            // case CMARK_NODE_INLINE_HTML:
-            //     OUT(cmark_node_get_literal(node), false, LITERAL);
-            //     break;
+            case 'Html':
+                this.out(node.literal, false, Escaping.LITERAL);
+                break;
 
-            // case CMARK_NODE_CUSTOM_INLINE:
-            //     OUT(entering ? cmark_node_get_on_enter(node) : cmark_node_get_on_exit(node),
-            //         false, LITERAL);
-            //     break;
-
-            // case CMARK_NODE_STRONG:
-            //     if (entering) {
-            //         LIT("**");
-            //     } else {
-            //         LIT("**");
-            //     }
-            //     break;
+            case 'Strong':
+                if (entering) {
+                    this.LIT("**");
+                } else {
+                    this.LIT("**");
+                }
+                break;
 
             case 'Emph':
                 // If we have EMPH(EMPH(x)), we need to use *_x_*
@@ -454,55 +533,51 @@ class Renderer {
                 }
                 break;
 
-            // case CMARK_NODE_LINK:
-            //     if (is_autolink(node)) {
-            //         if (entering) {
-            //             LIT("<");
-            //             if (strncmp(cmark_node_get_url(node), "mailto:", 7) == 0) {
-            //                 LIT((const char *)cmark_node_get_url(node) + 7);
-            //             } else {
-            //                 LIT((const char *)cmark_node_get_url(node));
-            //             }
-            //             LIT(">");
-            //             // return signal to skip contents of node...
-            //             return 0;
-            //         }
-            //     } else {
-            //         if (entering) {
-            //             LIT("[");
-            //         } else {
-            //             LIT("](");
-            //             OUT(cmark_node_get_url(node), false, URL);
-            //             title = cmark_node_get_title(node);
-            //             if (safe_strlen(title) > 0) {
-            //                 LIT(" \"");
-            //                 OUT(title, false, TITLE);
-            //                 LIT("\"");
-            //             }
-            //             LIT(")");
-            //         }
-            //     }
-            //     break;
+            case 'Link':
+                if (this.is_autolink(node)) {
+                    if (entering) {
+                        this.LIT("<");
+                        if (node.destination.substr(0, 7) === 'mailto:') {
+                            this.LIT(node.destination.substr(7));
+                        } else {
+                            this.LIT(node.destination);
+                        }
+                        this.LIT(">");
+                        // return signal to skip contents of node...
+                        return false;
+                    }
+                } else {
+                    if (entering) {
+                        this.LIT("[");
+                    } else {
+                        this.LIT("](");
+                        this.out(node.destination, false, Escaping.URL);
+                        title = node.title || '';
+                        if (title.length > 0) {
+                            this.LIT(" \"");
+                            this.out(title, false, Escaping.TITLE);
+                            this.LIT("\"");
+                        }
+                        this.LIT(")");
+                    }
+                }
+                break;
 
-            // case CMARK_NODE_IMAGE:
-            //     if (entering) {
-            //         LIT("![");
-            //     } else {
-            //         LIT("](");
-            //         OUT(cmark_node_get_url(node), false, URL);
-            //         title = cmark_node_get_title(node);
-            //         if (safe_strlen(title) > 0) {
-            //             OUT(" \"", true, LITERAL);
-            //             OUT(title, false, TITLE);
-            //             LIT("\"");
-            //         }
-            //         LIT(")");
-            //     }
-            //     break;
-
-            // default:
-            //     assert(false);
-            //     break;
+            case 'Image':
+                if (entering) {
+                    this.LIT("![");
+                } else {
+                    this.LIT("](");
+                    this.out(node.destination, false, Escaping.URL);
+                    title = node.title || '';
+                    if (title.length > 0) {
+                        this.out(" \"", true, Escaping.LITERAL);
+                        this.out(title, false, Escaping.TITLE);
+                        this.LIT("\"");
+                    }
+                    this.LIT(")");
+                }
+                break;
         }
 
         return true;
@@ -510,15 +585,7 @@ class Renderer {
 
 
     render(root: commonmark.Node, options: number, width: number) {
-        
-        // }
-    
-        // char *cmark_render(cmark_node *root, int options, int width,
-        //                    void (*outc)(cmark_renderer *, cmark_escaping, int32_t,
-        //                                 unsigned char),
-        //                    int (*render_node)(cmark_renderer *renderer,
-        //                                       cmark_node *node,
-        //                                       cmark_event_type ev_type, int options)) {
+
         this.buffer = '';
         let current: commonmark.Node;
         let eventType: CommonmarkEvent;
@@ -531,8 +598,7 @@ class Renderer {
                 // a false value causes us to skip processing
                 // the node's contents.  this is used for
                 // autolinks.
-                // cmark_iter_reset(iter, cur, CMARK_EVENT_EXIT);
-                throw ('exit');
+                walker.resumeAt(current, false);
             }
 
         }

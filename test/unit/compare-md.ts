@@ -124,7 +124,7 @@ export function assertEqualTrees(astExpected: commonmark.Node, astActual: common
         } else {
             // When the expected node info contains spaces, that info is lost after rendering
             let expectedInfo = expectedValue.info;
-            if (expectedInfo) {
+            if (expectedInfo.indexOf(' ') > -1 && actualValue.info && actualValue.info.indexOf(' ') === -1) {
                 let indexOfSpace = expectedInfo.indexOf(' ');
                 if (indexOfSpace >= 0) {
                     expectedInfo = expectedInfo.substr(0, indexOfSpace);
