@@ -2,7 +2,7 @@
   "name": "html2commonmark",
   "version": "0.0.2",
   "description": "Html coverter to markdown using the commonmark.js reference implementation of the CommonMark spec.",
-  "main": "dist/server/JSDomConverter.js",
+  "main": "dist/server/html2commonmark.js",
   "engines": {
     "node": ">=4"
   },
