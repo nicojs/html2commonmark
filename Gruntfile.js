@@ -79,7 +79,7 @@ module.exports = function (grunt) {
             },
             test: {
                 // webpack options
-                entry: './test/unit/client/html2ast.client.ts',
+                entry: ['./test/unit/client/html2ast.client.ts','./test/unit/client/ast2md.client.ts'],
                 output: {
                     path: '.tmp/client/test',
                     filename: 'bundle.js',
