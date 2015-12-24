@@ -17,8 +17,8 @@
 				"NODE_ENV": "development"
 			},
 			"externalConsole": false,
-			"sourceMaps": false,
-			"outDir": ".tmp"
+			"sourceMaps": true,
+			"outDir": ".tmp/server"
 		},
 		{
 			"name": "Attach",
