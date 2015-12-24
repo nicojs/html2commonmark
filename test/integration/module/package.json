@@ -1,0 +1,17 @@
+{
+  "name": "integration-test-module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt-mocha-test": "^0.12.7",
+    "html2commonmark": "file:../../..",
+    "jsdom": "^7.2.1",
+    "mocha": "^2.3.4"
+  }
+}

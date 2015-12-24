@@ -10,6 +10,9 @@ module.exports = function (grunt) {
             },
             dist: {
                 src: ['dist']
+            },
+            test:{
+                src: ['test/integration/module/node_modules/html2commonmark']
             }
         },
 
@@ -105,6 +108,12 @@ module.exports = function (grunt) {
             },
             unit: {
                 src: ['.tmp/server/test/unit/server/**/*.js']
+            },
+            integration: {
+                options: {
+                    timeout: 100000
+                },
+                src: ['test/integration/*.js']
             }
         },
 
@@ -121,6 +130,6 @@ module.exports = function (grunt) {
 
     grunt.registerTask('serve:server', ['clean', 'ts', 'watch']);
     grunt.registerTask('serve:client', ['clean', 'webpack:test', 'karma:watch']);
-    grunt.registerTask('test', ['clean', 'ts', 'mochaTest', 'webpack:test', 'karma:singleRun']);
+    grunt.registerTask('test', ['clean', 'ts', 'mochaTest:unit', 'webpack:test', 'karma:singleRun', 'copy:dist', 'mochaTest:integration']);
     grunt.registerTask('build', ['clean', 'ts', 'webpack', 'copy:dist']);
 }
