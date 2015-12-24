@@ -65,7 +65,7 @@ module.exports = function (grunt) {
             },
             src: {
                 // webpack options
-                entry: './.tmp/server/src/Converter.js',
+                entry: ['./.tmp/server/src/BrowserConverter.js', './.tmp/server/src/MarkdownRenderer.js'],
                 output: {
                     path: '.tmp/client/src',
                     filename: 'bundle.js',
@@ -73,6 +73,8 @@ module.exports = function (grunt) {
                 module: {
                     loaders: [
                         { test: /\.json$/, loader: 'json-loader' },
+                        { test: /BrowserConverter\.js$/, loader: 'expose?html2commonmark.BrowserConverter' },
+                        { test: /MarkdownRenderer\.js$/, loader: 'expose?html2commonmark.Renderer' },
                         { test: /Converter\.js$/, loader: 'expose?html2commonmark.Converter' }
                     ]
                 }
