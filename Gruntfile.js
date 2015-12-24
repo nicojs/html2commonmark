@@ -130,6 +130,6 @@ module.exports = function (grunt) {
 
     grunt.registerTask('serve:server', ['clean', 'ts', 'watch']);
     grunt.registerTask('serve:client', ['clean', 'webpack:test', 'karma:watch']);
-    grunt.registerTask('test', ['clean', 'ts', 'mochaTest:unit', 'webpack:test', 'karma:singleRun', 'copy:dist', 'mochaTest:integration']);
+    grunt.registerTask('test', ['build', 'mochaTest:unit', 'webpack:test', 'karma:singleRun', 'mochaTest:integration']);
     grunt.registerTask('build', ['clean', 'ts', 'webpack', 'copy:dist']);
 }

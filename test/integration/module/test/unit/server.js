@@ -10,4 +10,15 @@ describe('on the server', function () {
             expect(new html2commonmark.Renderer().render(ast)).to.be.equal('*mark***down**\n');
         });
     });
+    
+    describe('using Converter', function () {
+        it('should be able to parse html to markdown', function () {
+            var ast = new html2commonmark.Converter({
+                parse: function(html){
+                    return jsdom.jsdom(`<html><body>${html}</body></html>`, { features: { FetchExternalResources: false, ProcessExternalResources: false } }).defaultView.document.body;
+                }
+            }).convert('<i>mark</i><strong>down</strong>');
+            expect(new html2commonmark.Renderer().render(ast)).to.be.equal('*mark***down**\n');
+        });
+    });
 });
