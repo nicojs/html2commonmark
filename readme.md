@@ -24,7 +24,7 @@ You can install the library using `npm`:
 
 This package includes a dependency on commonmark.js.
 
-For client-side use, you can include the `node_modules/html2commonmark/dist/bundle.js`
+For client-side use, you can include the `node_modules/html2commonmark/dist/client/bundle.js`
 on your web page. It exposes the global `html2commonmark` variable.
 
 For server-side use, you can simply require it: `var html2commonmark = require('html2commonmark');`.
