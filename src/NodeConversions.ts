@@ -28,8 +28,8 @@ function convert(domNode: Node, state: ConversionState): NodeConversion {
             return new LinkConversion(state, domNode);
         case 'br':
             return new NamedContainerConversion(state, 'Hardbreak');
-        case 'body':
-            return new NamedContainerConversion(state, 'Document');
+        case 'body': case 'custom-root':
+            return new NoopConversion(state);
         case 'pre':
             return new NamedContainerConversion(state, 'CodeBlock');
         case 'code':
@@ -57,20 +57,10 @@ function convert(domNode: Node, state: ConversionState): NodeConversion {
             return new InlineConversion(state, 'Strong');
         case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': case 'h7': case 'h8': case 'h9':
             return new HeaderConversion(state, parseInt(domNode.nodeName.substr(1)));
-        case 'address': case 'article': case 'aside': case 'base': case 'basefont': 
-			/*case 'blockquote': case 'body':*/ case 'caption': case 'center': case 'col': case 'colgroup':
-        case 'dd': case 'details': case 'dialog': case 'dir': case 'div': case 'dl': case 'dt':
-        case 'fieldset': case 'figcaption': case 'figure': case 'footer': case 'form': case 'frame':
-        case 'frameset': /*case 'h1':*/ case 'head': case 'header': /*case 'hr':*/ case 'html':
-        case 'iframe': case 'legend': /*case 'li':*/ case 'link': case 'main': case 'menu':
-        case 'menuitem': case 'meta': case 'nav': case 'noframes': /*case 'ol':*/ case 'optgroup': case 'option': 
-			/*case 'p':*/ case 'param': case 'section': case 'source': case 'summary': case 'table': case 'tbody':
-        case 'td': case 'tfoot': case 'th': case 'thead': case 'title': case 'tr': case 'track': /*case 'ul':*/
         default:
             if (state.options.interpretUnknownHtml) {
                 return new RawHtmlConversion(state, domNode);
             } else {
-                console.log(`No conversion specified for html element ${nodeName}, ignoring it by default.`);
                 return new NoopConversion(state);
             }
     }

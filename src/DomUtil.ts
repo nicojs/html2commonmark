@@ -42,10 +42,10 @@ export = class NodeUtil {
 			let attr = domElement.attributes.item(i);	
 			attributes += ` ${attr.name}="${attr.value}"`;
 		}
-		return `<${domElement.tagName}${attributes}>`;
+		return `<${domElement.tagName.toLowerCase()}${attributes}>`;
 	}
 	
 	public static writeEndElement(domElement: Element){
-		return `</${domElement.tagName}>`;
+		return `</${domElement.tagName.toLowerCase()}>`;
 	}
 }

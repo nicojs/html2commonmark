@@ -5,7 +5,6 @@ import compareMD = require('./compare-md');
 import compareHtml = require('./compare-html');
 
 export = (description: string, htmlParser: HtmlParser) => {
-    let sut = new Converter(htmlParser);
     let commonmarkParser = new commonmark.Parser();
     var htmlWriter = new commonmark.HtmlRenderer();
     let optionMap: {
@@ -53,7 +52,8 @@ export = (description: string, htmlParser: HtmlParser) => {
         tests.filter(t => scoped.indexOf(t.example) >= 0).forEach(test => {
             var compareHtmlOnly = examplesOfWhichOnlyCompareHtmlResult.indexOf(test.example) >= 0;
             it(`test #${test.example}, section ${test.section}:\n(html:) ${oneLine(test.html)}\n(md:)   ${oneLine(test.markdown)}${compareHtmlOnly ? '\n(html:) ' + oneLine(test.html) : ''}`, () => {
-                let actualAst = sut.convert(test.html, optionMap[test.example]);
+                let sut = new Converter(htmlParser, optionMap[test.example]);
+                let actualAst = sut.convert(test.html);
                 let expectedAst = commonmarkParser.parse(test.markdown);
                 if (compareHtmlOnly) {
                     let expectedHtml = htmlWriter.render(expectedAst);
