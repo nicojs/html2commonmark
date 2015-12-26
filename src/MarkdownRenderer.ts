@@ -7,9 +7,9 @@ enum Escaping {
     URL
 }
 
-export = class MarkdownRenderer {
+class MarkdownRenderer {
 
-    options: Ast2MarkdownOptions;
+    private options: Ast2MarkdownOptions;
 
     constructor(options?: Ast2MarkdownOptions) { 
         this.options = Util.assign({ preserveHardbreaks: true, preserveSoftbreaks: true }, options);
@@ -77,7 +77,7 @@ export = class MarkdownRenderer {
         }
     }
 
-    out(source: string, wrap: boolean, escape: Escaping) {
+    private out(source: string, wrap: boolean, escape: Escaping) {
         let nextc: string;
         let c: string;
         let i = 0;
@@ -529,3 +529,5 @@ export = class MarkdownRenderer {
         return this.buffer;
     }
 }
+
+export = MarkdownRenderer;
