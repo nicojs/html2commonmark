@@ -38,11 +38,11 @@ class Converter {
             case 'a':
                 return new LinkConversion(walker, this, domNode);
             case 'br':
-                return new NamedContainerConversion(walker, this, 'Hardbreak');
+                return new NamedContainerConversion(walker, this, 'Hardbreak', true);
             case 'body': case 'custom-root':
                 return new NoopConversion(walker, this);
             case 'pre':
-                return new NamedContainerConversion(walker, this, 'CodeBlock');
+                return new NamedContainerConversion(walker, this, 'CodeBlock', false);
             case 'code':
                 return new CodeBlockConversion(walker, this, domNode);
             case 'img':
@@ -51,15 +51,15 @@ class Converter {
             case 'ol':
                 return new ListConversion(walker, this, domNode);
             case 'li':
-                return new NamedContainerConversion(walker, this, 'Item');
+                return new NamedContainerConversion(walker, this, 'Item', false);
             case 'p':
-                return new NamedContainerConversion(walker, this, 'Paragraph');
+                return new NamedContainerConversion(walker, this, 'Paragraph', false);
             case 'hr':
-                return new NamedContainerConversion(walker, this, 'HorizontalRule');
+                return new NamedContainerConversion(walker, this, 'HorizontalRule', false);
             case '#text':
                 return new TextConversion(walker, this, domNode);
             case 'blockquote':
-                return new NamedContainerConversion(walker, this, 'BlockQuote');
+                return new NamedContainerConversion(walker, this, 'BlockQuote', false);
             case 'i':
             case 'em':
                 return new InlineConversion(walker, this, 'Emph');
@@ -80,10 +80,10 @@ class Converter {
 }
 
 
-abstract class AbstractNodeConversion implements NodeConversion {
+abstract class NodeConversion {
 
     protected children: Array<NodeConversion>;
-
+    public abstract isInline();
     constructor(domWalker: DomWalker, converter: Converter) {
         this.children = [];
         let next: WalkingStep;
@@ -95,16 +95,26 @@ abstract class AbstractNodeConversion implements NodeConversion {
     public abstract execute(container?: commonmark.Node): commonmark.Node;
 }
 
-class NoopConversion extends AbstractNodeConversion {
+class NoopConversion extends NodeConversion {
     public execute(container: commonmark.Node) {
         return this.children.map(c => c.execute(container)).pop();
     }
+
+    public isInline() {
+        let inline = true;
+        this.children.forEach(c => inline = inline && c.isInline())
+        return inline;
+    }
 }
 
-class NamedContainerConversion extends AbstractNodeConversion {
+class NamedContainerConversion extends NodeConversion {
 
-    public constructor(domWalker: DomWalker, converter: Converter, protected nodeName: string, protected literal: string = null) {
+    public constructor(domWalker: DomWalker, converter: Converter, protected nodeName: string, private inline: boolean, protected literal: string = null) {
         super(domWalker, converter);
+    }
+
+    public isInline() {
+        return this.inline;
     }
 
     public execute(container?: commonmark.Node): commonmark.Node {
@@ -120,7 +130,7 @@ class NamedContainerConversion extends AbstractNodeConversion {
 
 class LinkConversion extends NamedContainerConversion {
     constructor(domWalker: DomWalker, converter: Converter, private anchorTag: Node) {
-        super(domWalker, converter, 'Link');
+        super(domWalker, converter, 'Link', true);
     }
 
     public execute(container: commonmark.Node) {
@@ -143,7 +153,7 @@ class LinkConversion extends NamedContainerConversion {
 
 class HeaderConversion extends NamedContainerConversion {
     public constructor(domWalker: DomWalker, converter: Converter, private level: number) {
-        super(domWalker, converter, 'Header');
+        super(domWalker, converter, 'Header', false);
     }
 
     public execute(container: commonmark.Node) {
@@ -153,10 +163,14 @@ class HeaderConversion extends NamedContainerConversion {
     }
 }
 
-class InlineConversion extends AbstractNodeConversion {
+class InlineConversion extends NodeConversion {
 
     public constructor(domWalker: DomWalker, converter: Converter, private nodeName: string) {
         super(domWalker, converter);
+    }
+
+    public isInline() {
+        return true;
     }
 
     public execute(container: commonmark.Node) {
@@ -166,7 +180,7 @@ class InlineConversion extends AbstractNodeConversion {
     }
 }
 
-class TextConversion extends AbstractNodeConversion {
+class TextConversion extends NodeConversion {
 	
     // Not sure of this solution holds, but we'll see
     private static INLINE_HTML_NODES_OF_WHICH_SIBLINGS_SHOULD_BE_TRIMMED = ['br', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8', 'h9'];
@@ -174,6 +188,10 @@ class TextConversion extends AbstractNodeConversion {
 
     constructor(domWalker: DomWalker, converter: Converter, private textNode: Node) {
         super(domWalker, converter);
+    }
+
+    public isInline() {
+        return true;
     }
 
     public execute(container: commonmark.Node) {
@@ -244,7 +262,7 @@ class TextConversion extends AbstractNodeConversion {
 class ImageConversion extends NamedContainerConversion {
 
     constructor(domWalker: DomWalker, converter: Converter, private imgTag: Node) {
-        super(domWalker, converter, 'Image');
+        super(domWalker, converter, 'Image', true);
     }
 
     public execute(container: commonmark.Node) {
@@ -275,7 +293,7 @@ class ImageConversion extends NamedContainerConversion {
 class ListConversion extends NamedContainerConversion {
 
     constructor(domWalker: DomWalker, converter: Converter, private listTag: Node) {
-        super(domWalker, converter, 'List');
+        super(domWalker, converter, 'List', false);
     }
 
     public execute(container: commonmark.Node) {
@@ -297,10 +315,14 @@ class ListConversion extends NamedContainerConversion {
     }
 }
 
-class CodeBlockConversion extends AbstractNodeConversion {
+class CodeBlockConversion extends NodeConversion {
 
     constructor(domWalker: DomWalker, converter: Converter, private codeTag: Node) {
         super(domWalker, converter);
+    }
+
+    public isInline() {
+        return false;
     }
 
     public execute(container: commonmark.Node) {
@@ -337,10 +359,14 @@ class CodeBlockConversion extends AbstractNodeConversion {
     }
 }
 
-class RawHtmlConversion extends AbstractNodeConversion {
+class RawHtmlConversion extends NodeConversion {
 
     public constructor(domWalker: DomWalker, converter: Converter, private rawHtmlNode: Node) {
         super(domWalker, converter);
+    }
+
+    public isInline() {
+        return false;
     }
 
     public execute(container?: commonmark.Node) {

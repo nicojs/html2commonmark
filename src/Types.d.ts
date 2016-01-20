@@ -3,10 +3,6 @@ interface WalkingStep {
     isEntering: boolean;
 }
 
-interface NodeConversion {
-    execute(container: commonmark.Node): commonmark.Node;
-}
-
 interface Html2AstOptions {
     rawHtmlElements?: Array<string>;
     ignoredHtmlElements?: Array<string>;
