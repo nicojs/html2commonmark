@@ -21,12 +21,12 @@ class Converter {
         let htmlElement = this.parser.parse(html);
         let walker = new DomWalker(htmlElement);
         let document = new commonmark.Node('Document');
-        this.convertDomNode(walker.next().domNode, walker).execute(document);
+        let conversion = this.createConversion(walker.next().domNode, walker).execute(document);
         return document;
     }
 
     /** @internal */
-    convertDomNode(domNode: Node, walker: DomWalker): NodeConversion {
+    createConversion(domNode: Node, walker: DomWalker): NodeConversion {
         let nodeName = domNode.nodeName.toLowerCase();
         if (this.options.rawHtmlElements.indexOf(nodeName) >= 0) {
             return new RawHtmlConversion(walker, this, domNode);
@@ -38,11 +38,11 @@ class Converter {
             case 'a':
                 return new LinkConversion(walker, this, domNode);
             case 'br':
-                return new NamedContainerConversion(walker, this, 'Hardbreak', true);
+                return new NamedContainerConversion(walker, this, 'Hardbreak');
             case 'body': case 'custom-root':
                 return new NoopConversion(walker, this);
             case 'pre':
-                return new NamedContainerConversion(walker, this, 'CodeBlock', false);
+                return new NamedContainerConversion(walker, this, 'CodeBlock');
             case 'code':
                 return new CodeBlockConversion(walker, this, domNode);
             case 'img':
@@ -51,15 +51,15 @@ class Converter {
             case 'ol':
                 return new ListConversion(walker, this, domNode);
             case 'li':
-                return new NamedContainerConversion(walker, this, 'Item', false);
+                return new ListItemConversion(walker, this);
             case 'p':
-                return new NamedContainerConversion(walker, this, 'Paragraph', false);
+                return new NamedContainerConversion(walker, this, 'Paragraph');
             case 'hr':
-                return new NamedContainerConversion(walker, this, 'HorizontalRule', false);
+                return new NamedContainerConversion(walker, this, 'HorizontalRule');
             case '#text':
                 return new TextConversion(walker, this, domNode);
             case 'blockquote':
-                return new NamedContainerConversion(walker, this, 'BlockQuote', false);
+                return new NamedContainerConversion(walker, this, 'BlockQuote');
             case 'i':
             case 'em':
                 return new InlineConversion(walker, this, 'Emph');
@@ -83,12 +83,11 @@ class Converter {
 abstract class NodeConversion {
 
     protected children: Array<NodeConversion>;
-    public abstract isInline();
     constructor(domWalker: DomWalker, converter: Converter) {
         this.children = [];
         let next: WalkingStep;
         while ((next = domWalker.next()).isEntering) {
-            this.children.push(converter.convertDomNode(next.domNode, domWalker));
+            this.children.push(converter.createConversion(next.domNode, domWalker));
         }
     }
 
@@ -99,22 +98,12 @@ class NoopConversion extends NodeConversion {
     public execute(container: commonmark.Node) {
         return this.children.map(c => c.execute(container)).pop();
     }
-
-    public isInline() {
-        let inline = true;
-        this.children.forEach(c => inline = inline && c.isInline())
-        return inline;
-    }
 }
 
 class NamedContainerConversion extends NodeConversion {
 
-    public constructor(domWalker: DomWalker, converter: Converter, protected nodeName: string, private inline: boolean, protected literal: string = null) {
+    public constructor(domWalker: DomWalker, converter: Converter, protected nodeName: string, protected literal: string = null) {
         super(domWalker, converter);
-    }
-
-    public isInline() {
-        return this.inline;
     }
 
     public execute(container?: commonmark.Node): commonmark.Node {
@@ -128,9 +117,50 @@ class NamedContainerConversion extends NodeConversion {
     }
 }
 
+/**
+ * Represents a container block
+ * A block node which can only contain other block nodes
+ * See 3.2 Container blocks and leaf blocks of the spec
+ */
+class ContainerBlockConversion extends NamedContainerConversion {
+
+    public constructor(domWalker: DomWalker, converter: Converter, nodeName: string) {
+        super(domWalker, converter, nodeName);
+    }
+
+    public execute(container: commonmark.Node) {
+        let containerBlockNode = super.execute(container);
+
+        let wrapInlineNodes = (inlineNodes: Array<commonmark.Node>) => {
+            if (inlineNodes.length) {
+                let wrapper = new commonmark.Node('Paragraph');
+                inlineNodes[0].insertBefore(wrapper);
+                inlineNodes.forEach(c => wrapper.appendChild(c));
+            }
+        }
+        
+        // If we have children and some children are inline, we incapsulate those in a paragraph conversion 
+        if (containerBlockNode.firstChild) {
+            let child = containerBlockNode.firstChild;
+            let inlineNodes: Array<commonmark.Node> = [];
+            while (child) {
+                if (MarkdownUtil.isInline(child)) {
+                    inlineNodes.push(child);
+                } else {
+                   wrapInlineNodes(inlineNodes);
+                   inlineNodes = [];
+                }
+                child = child.next;
+            }
+            wrapInlineNodes(inlineNodes);
+        }
+        return containerBlockNode;
+    }
+}
+
 class LinkConversion extends NamedContainerConversion {
     constructor(domWalker: DomWalker, converter: Converter, private anchorTag: Node) {
-        super(domWalker, converter, 'Link', true);
+        super(domWalker, converter, 'Link');
     }
 
     public execute(container: commonmark.Node) {
@@ -153,7 +183,7 @@ class LinkConversion extends NamedContainerConversion {
 
 class HeaderConversion extends NamedContainerConversion {
     public constructor(domWalker: DomWalker, converter: Converter, private level: number) {
-        super(domWalker, converter, 'Header', false);
+        super(domWalker, converter, 'Header');
     }
 
     public execute(container: commonmark.Node) {
@@ -163,20 +193,10 @@ class HeaderConversion extends NamedContainerConversion {
     }
 }
 
-class InlineConversion extends NodeConversion {
+class InlineConversion extends NamedContainerConversion {
 
-    public constructor(domWalker: DomWalker, converter: Converter, private nodeName: string) {
-        super(domWalker, converter);
-    }
-
-    public isInline() {
-        return true;
-    }
-
-    public execute(container: commonmark.Node) {
-        var inlineNode = new commonmark.Node(this.nodeName);
-        this.children.forEach(c => c.execute(inlineNode));
-        return MarkdownUtil.addInlineBlocks([inlineNode], container)
+    public constructor(domWalker: DomWalker, converter: Converter, nodeName: string) {
+        super(domWalker, converter, nodeName);
     }
 }
 
@@ -190,10 +210,6 @@ class TextConversion extends NodeConversion {
         super(domWalker, converter);
     }
 
-    public isInline() {
-        return true;
-    }
-
     public execute(container: commonmark.Node) {
 
         let textContent = this.trimTextContent();
@@ -201,19 +217,18 @@ class TextConversion extends NodeConversion {
             container.literal = this.textNode.textContent;
             return null;
         } else if (textContent) {
-            let nodes: Array<commonmark.Node> = [];
             var lines = textContent.split(TextConversion.SOFTBREAK_SUBSTITUTION_CHARACTER);
             lines.forEach((line, index) => {
                 if (line) {
                     let node = new commonmark.Node('Text');
                     node.literal = line;
-                    nodes.push(node);
+                    container.appendChild(node);
                 }
                 if (lines.length > 1 && index != (lines.length - 1)) {
-                    nodes.push(new commonmark.Node('Softbreak'));
+                    container.appendChild(new commonmark.Node('Softbreak'));
                 }
             });
-            return MarkdownUtil.addInlineBlocks(nodes, container);
+            return container.firstChild;
         }
     }
 
@@ -262,7 +277,7 @@ class TextConversion extends NodeConversion {
 class ImageConversion extends NamedContainerConversion {
 
     constructor(domWalker: DomWalker, converter: Converter, private imgTag: Node) {
-        super(domWalker, converter, 'Image', true);
+        super(domWalker, converter, 'Image');
     }
 
     public execute(container: commonmark.Node) {
@@ -293,7 +308,7 @@ class ImageConversion extends NamedContainerConversion {
 class ListConversion extends NamedContainerConversion {
 
     constructor(domWalker: DomWalker, converter: Converter, private listTag: Node) {
-        super(domWalker, converter, 'List', false);
+        super(domWalker, converter, 'List');
     }
 
     public execute(container: commonmark.Node) {
@@ -312,6 +327,12 @@ class ListConversion extends NamedContainerConversion {
                 break;
         }
         return list;
+    }
+}
+
+class ListItemConversion extends ContainerBlockConversion {
+    constructor(domWalker: DomWalker, converter: Converter) {
+        super(domWalker, converter, 'Item');
     }
 }
 
