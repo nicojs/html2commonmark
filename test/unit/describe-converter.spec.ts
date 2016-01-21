@@ -6,6 +6,15 @@ let expect = chai.expect;
 export = (description: string, htmlParser: HtmlParser) => {
 
     let write = (root: commonmark.Node) => console.log(new commonmark.XmlRenderer().render(root));
+    let forAllNodes = (root: commonmark.Node, action: (node: commonmark.Node) => void) => {
+        let walker = root.walker();
+        let walkStep: commonmark.WalkingStep;
+        while (walkStep = walker.next()) {
+            if (walkStep.entering) {
+                action(walkStep.node);
+            }
+        }
+    };
 
     describe(`${description}: Converter`, () => {
         describe('using rawHtmlElements: \'p\', \'some-stuff\', interpretUnknownHtml: false', () => {
@@ -71,6 +80,27 @@ export = (description: string, htmlParser: HtmlParser) => {
                 expect(actualAst.firstChild.next.next.type).to.be.eq('HtmlBlock');
                 expect(actualAst.firstChild.next.next.literal).to.be.eq('</random-element>');
             });
+        });
+
+        describe('when testing issues', () => {
+
+            let sut: Converter;
+            before(() => {
+                sut = new Converter(htmlParser);
+            });
+
+            let htmlListWithInlineContent = `<ul><li><em>3</em> nodes</li></ul>`;
+            it(`should not create multiple paragraphs for ${htmlListWithInlineContent} (https://github.com/nicojs/html2commonmark/issues/1)`, () => {
+                let actualAst = sut.convert(htmlListWithInlineContent);
+                let numberOfParagraphs = 0;
+                forAllNodes(actualAst, node => {
+                    if (node.type === 'Paragraph') {
+                        numberOfParagraphs++;
+                    }
+                });
+                expect(numberOfParagraphs, `Created ${numberOfParagraphs} paragraphs for inline content where 1 paragraph was expected. Abstract syntax tree is: ${new commonmark.XmlRenderer().render(actualAst)}`).to.be.eq(1);
+            });
+
         });
     });
 };
