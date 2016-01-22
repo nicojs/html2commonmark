@@ -89,7 +89,7 @@ export = (description: string, htmlParser: HtmlParser) => {
                 sut = new Converter(htmlParser);
             });
 
-            let htmlListWithInlineContent = `<ul><li><em>3</em> nodes</li></ul>`;
+            let htmlListWithInlineContent = `<ul><li><em>3</em> <code>nodes</code></li></ul>`;
             it(`should not create multiple paragraphs for ${htmlListWithInlineContent} (https://github.com/nicojs/html2commonmark/issues/1)`, () => {
                 let actualAst = sut.convert(htmlListWithInlineContent);
                 let numberOfParagraphs = 0;

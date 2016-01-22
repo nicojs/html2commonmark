@@ -88,7 +88,8 @@ module.exports = function (grunt) {
                     './test/unit/client/html2ast.client.ts', 
                     './test/unit/client/converter.spec.client.ts',
                     './test/unit/client/ast2md.client.ts',
-                    './test/unit/client/MarkdownRenderer.spec.client.ts'],
+                    './test/unit/client/MarkdownRenderer.spec.client.ts',
+                    './test/unit/client/back-and-forth.client.ts'],
                 output: {
                     path: '.tmp/client/test',
                     filename: 'bundle.js',

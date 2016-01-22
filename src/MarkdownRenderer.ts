@@ -290,7 +290,7 @@ class MarkdownRenderer {
                 if (node.parent.listType === 'Bullet') {
                     markerWidth = 2;
                 } else {
-                    let listNumber = node.parent.listStart;
+                    let listNumber = node.parent.listStart || 1;
                     let listDelimiter = node.parent.listDelimiter;
                     let tmp = node;
                     while (tmp.prev) {
@@ -300,7 +300,7 @@ class MarkdownRenderer {
                     // we ensure a width of at least 4 so
                     // we get nice transition from single digits
                     // to double
-                    listMarker = listNumber.toString() + listDelimiter;
+                    listMarker = listNumber + listDelimiter;
                     if (listNumber < 10) {
                         listMarker += '  ';
                     } else {

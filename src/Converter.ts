@@ -317,10 +317,10 @@ class ListConversion extends NamedContainerConversion {
         let start = this.listTag.attributes.getNamedItem('start');
         switch (this.listTag.nodeName.toLowerCase()) {
             case 'ul':
-                list.listType = 'bullet';
+                list.listType = 'Bullet';
                 break;
             case 'ol':
-                list.listType = 'ordered';
+                list.listType = 'Ordered';
                 if (start && start.value) {
                     list.listStart = parseInt(start.value);
                 }

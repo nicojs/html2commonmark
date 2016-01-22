@@ -5,6 +5,9 @@ module.exports = function (config) {
             {
                 pattern: '.tmp/client/**/*.js.map',
                 included: false
+            }, {
+                pattern: 'readme.md',
+                included: false  
             },
             '.tmp/client/**/*.js',
             'test/unit/client/**.js'
