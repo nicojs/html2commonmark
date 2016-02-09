@@ -5,10 +5,10 @@
 			"name": "Run mocha",
 			"type": "node",
 			"request": "launch",
-			"program": "node_modules/grunt-cli/bin/grunt",
+			"program": "${workspaceRoot}/node_modules/grunt-cli/bin/grunt",
 			"stopOnEntry": false,
 			"args": ["mochaTest"],
-			"cwd": ".",
+			"cwd": "${workspaceRoot}/.",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"
@@ -18,7 +18,7 @@
 			},
 			"externalConsole": false,
 			"sourceMaps": true,
-			"outDir": ".tmp/server"
+			"outDir": "${workspaceRoot}/.tmp/server"
 		},
 		{
 			"name": "Attach",
