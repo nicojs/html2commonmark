@@ -1,6 +1,6 @@
-import jsdom = require('jsdom');
+import * as jsdom from 'jsdom';
 
-export = class JSDomParser implements HtmlParser {
+export default class JSDomParser implements HtmlParser {
     parse(html: string): HTMLElement {
         return jsdom.jsdom(`<html><body>${html}</body></html>`, { features: { FetchExternalResources: false, ProcessExternalResources: false } }).defaultView.document.body;
     }

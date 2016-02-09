@@ -1,10 +1,10 @@
-import tests = require('./read-commonmark-tests');
-import Converter = require('../../src/Converter');
-import commonmark = require('commonmark');
-import compareMD = require('./compare-md');
-import compareHtml = require('./compare-html');
+import tests from './read-commonmark-tests';
+import Converter from '../../src/Converter';
+import * as commonmark from 'commonmark';
+import compareMD from './compare-md';
+import compareHtml from './compare-html';
 
-export = (description: string, htmlParser: HtmlParser) => {
+export default (description: string, htmlParser: HtmlParser) => {
     let commonmarkParser = new commonmark.Parser();
     var htmlWriter = new commonmark.HtmlRenderer();
     let optionMap: {
@@ -60,7 +60,7 @@ export = (description: string, htmlParser: HtmlParser) => {
                     let actualHtml = htmlWriter.render(actualAst);
                     compareHtml(expectedHtml, actualHtml, htmlParser);
                 } else {
-                    compareMD.assertEqualTrees(expectedAst, actualAst, htmlParser, false);
+                    compareMD(expectedAst, actualAst, htmlParser, false);
                 }
             });
         });

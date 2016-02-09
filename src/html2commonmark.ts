@@ -1,6 +1,9 @@
-import JSDomConverter = require('./JSDomConverter');
-import Converter = require('./Converter');
-import MarkdownRenderer = require('./MarkdownRenderer');
+/// <reference path="./Types.d.ts" />
+
+import JSDomConverter from './JSDomConverter';
+import BrowserConverter from './BrowserConverter';
+import Converter from './Converter';
+import MarkdownRenderer from './MarkdownRenderer';
 
 
-export = { JSDomConverter, Converter, Renderer: MarkdownRenderer };
+export { BrowserConverter, JSDomConverter, Converter, MarkdownRenderer as Renderer };

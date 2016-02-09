@@ -1,6 +1,6 @@
-import commonmark = require('commonmark');
+import * as commonmark from 'commonmark';
 
-export = class MarkDownUtil{
+export default class MarkDownUtil{
     private static INLINE_NODE_TYPES = ['Link', 'Text', 'Softbreak', 'Image', 'Code', 'Hardbreak', 'Html', 'Emph', 'Strong'];
     
     static isInline(node: commonmark.Node): boolean {

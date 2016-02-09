@@ -1,8 +1,8 @@
-import jsdom = require('jsdom');
+import * as jsdom from 'jsdom';
 import * as commonmark from 'commonmark';
-import DomUtil = require('./DomUtil');
+import DomUtil from './DomUtil';
 
-class DomWalker {
+export default class DomWalker {
     current: Node;
     root: Node;
     isEntering: boolean;
@@ -54,4 +54,3 @@ class DomWalker {
         this.isEntering = !!isEntering;
     }
 }
-export = DomWalker;

@@ -1,4 +1,4 @@
-import describeHtml2ast = require('../describe-commonmark-spec-ast2md');
-import BrowserParser = require('../../../src/BrowserParser');
+import describeHtml2ast from '../describe-commonmark-spec-ast2md';
+import BrowserParser from '../../../src/BrowserParser';
 
 describeHtml2ast('From nodejs: AST => CommonMark', new BrowserParser());

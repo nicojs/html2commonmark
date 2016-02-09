@@ -1,9 +1,9 @@
-import commonmark = require('commonmark');
-import chai = require('chai');
-import compareHtml = require('./compare-html');
+import * as commonmark from 'commonmark';
+import * as chai from 'chai';
+import compareHtml from './compare-html';
 let expect = chai.expect;
 
-export function assertEqualTrees(astExpected: commonmark.Node, astActual: commonmark.Node, htmlParser: HtmlParser, logInfo?: boolean) {
+export default function assertEqualTrees(astExpected: commonmark.Node, astActual: commonmark.Node, htmlParser: HtmlParser, logInfo?: boolean) {
     astExpected = normalizeTree(astExpected);
     astActual = normalizeTree(astActual);
     let expectedWalker = astExpected.walker();

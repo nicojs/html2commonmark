@@ -1,7 +1,7 @@
-import Converter = require('./Converter');
-import BrowserParser = require('./BrowserParser');
+import Converter from './Converter';
+import BrowserParser from './BrowserParser';
 
-export = class BrowserConverter extends Converter {
+export default class BrowserConverter extends Converter {
 
     constructor() {
         super(new BrowserParser());

@@ -1,4 +1,5 @@
-import Util = require('./Util');
+import Util from './Util';
+import * as commonmark from 'commonmark';
 
 enum Escaping {
     LITERAL,
@@ -7,7 +8,7 @@ enum Escaping {
     URL
 }
 
-class MarkdownRenderer {
+export default class MarkdownRenderer {
 
     private options: Ast2MarkdownOptions;
 
@@ -529,5 +530,3 @@ class MarkdownRenderer {
         return this.buffer;
     }
 }
-
-export = MarkdownRenderer;

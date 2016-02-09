@@ -1,22 +1,22 @@
-import Converter = require('../../src/Converter');
-import Renderer = require('../../src/MarkdownRenderer');
-import commonmark = require('commonmark');
-import compareMD = require('./compare-md');
-import compareHtml = require('./compare-html');
+import Converter from '../../src/Converter';
+import Renderer from '../../src/MarkdownRenderer';
+import * as commonmark from 'commonmark';
+import compareMD from './compare-md';
+import compareHtml from './compare-html';
 
-interface InputFile {
+export interface InputFile {
     description: string,
     content: Promise<string>
 }
 
-export = (description: string, htmlParser: HtmlParser, files: Array<InputFile>) => {
+export default (description: string, htmlParser: HtmlParser, files: Array<InputFile>) => {
 
     let assertMarkdownBackAndForth = (input: string) => {
         var parser = new commonmark.Parser();
         var ast = parser.parse(input);
         var html = new commonmark.HtmlRenderer().render(parser.parse(input));
         var output = new Renderer().render(new Converter(htmlParser).convert(html));
-        compareMD.assertEqualTrees(parser.parse(input), new Converter(htmlParser).convert(html), htmlParser);
+        compareMD(parser.parse(input), new Converter(htmlParser).convert(html), htmlParser);
     };
 
     describe(`${description} - back and forth parsing`, () => {

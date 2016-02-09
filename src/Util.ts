@@ -1,5 +1,5 @@
 
-export = class Assign {
+export default class Util {
     
     // Object.Assign equivalent
     public static assign<T>(defaults: T, overrides: T): T {
