@@ -42,7 +42,7 @@ module.exports = function (grunt) {
         // TypeScript compilation
         ts: {
             src: {
-                tsconfig: 'tsconfig.json'
+                tsconfig: true
             }
         },
 
