@@ -6,9 +6,12 @@
         "moduleResolution": "node",
         "rootDir": ".",
         "sourceMap": true,
-        "outDir": ".tmp/server"
+        "outDir": ".tmp/server",
+        "declaration": true
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "dist",
+        ".tmp"
     ]
 }
