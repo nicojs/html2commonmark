@@ -1,5 +1,5 @@
-import describeBackAndForth = require('../describe-back-and-forth');
-import BrowserParser = require('../../../src/BrowserParser');
+import describeBackAndForth from '../describe-back-and-forth';
+import BrowserParser from '../../../src/BrowserParser';
 
 let retrieveFromServer: (url: string) => Promise<string> = (url: string) => {
 

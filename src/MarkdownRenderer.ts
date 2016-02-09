@@ -1,4 +1,6 @@
-import Util = require('./Util');
+import Util from './Util';
+import * as commonmark from 'commonmark';
+import {Ast2MarkdownOptions} from './Types';
 
 enum Escaping {
     LITERAL,
@@ -7,7 +9,7 @@ enum Escaping {
     URL
 }
 
-class MarkdownRenderer {
+export default class MarkdownRenderer {
 
     private options: Ast2MarkdownOptions;
 
@@ -201,7 +203,7 @@ class MarkdownRenderer {
     private consolidateTextNodes(root: commonmark.Node): string | boolean {
         let text = '';
         let walker = root.walker();
-        let current: commonmark.WalkingStep;
+        let current: commonmark.NodeWalkingStep;
         walker.next();
         while ((current = walker.next()) && current.node !== root) {
             if (current.entering) {
@@ -510,7 +512,7 @@ class MarkdownRenderer {
         this.buffer = '';
         let current: commonmark.Node;
         let walker = root.walker();
-        let step: commonmark.WalkingStep;
+        let step: commonmark.NodeWalkingStep;
         while (step = walker.next()) {
             current = step.node;
             if (!this.renderNode(current, step.entering)) {
@@ -529,5 +531,3 @@ class MarkdownRenderer {
         return this.buffer;
     }
 }
-
-export = MarkdownRenderer;

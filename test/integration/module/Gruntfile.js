@@ -2,6 +2,7 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-ts');
 
     grunt.initConfig({
         mochaTest: {
@@ -13,6 +14,12 @@ module.exports = function (grunt) {
         karma: {
             client: {
                 configFile: 'karma.conf.integration-test.js'
+            }
+        },
+        
+        ts: {
+            compile: {
+                tsconfig: true
             }
         }
     });

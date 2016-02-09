@@ -1,6 +1,6 @@
 
 
-export = class NodeUtil {
+export default class DomUtil {
 
 	private static TYPES_WITH_MANDATORY_BLOCKED_CONTENT = ['Item', 'BlockQuote'];
 	
@@ -30,7 +30,7 @@ export = class NodeUtil {
 		if (domNode) {
 			return domNode.nodeType === domNode.TEXT_NODE ||
 				domNode.nodeType === domNode.COMMENT_NODE ||
-				(domNode.nodeType === domNode.ELEMENT_NODE && (NodeUtil.BLOCK_LEVEL_HTML_NODES.indexOf(domNode.nodeName.toLowerCase()) < 0));
+				(domNode.nodeType === domNode.ELEMENT_NODE && (DomUtil.BLOCK_LEVEL_HTML_NODES.indexOf(domNode.nodeName.toLowerCase()) < 0));
 		} else {
 			return false;
 		}

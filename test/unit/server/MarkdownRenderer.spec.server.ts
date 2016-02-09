@@ -1,4 +1,4 @@
-import describeMarkdownRenderer = require('../describe-MarkdownRenderer.spec');
-import JSDomParser = require('../../../src/JSDomParser');
+import describeMarkdownRenderer from '../describe-MarkdownRenderer.spec';
+import JSDomParser from '../../../src/JSDomParser';
 
 describeMarkdownRenderer('From browser', new JSDomParser());

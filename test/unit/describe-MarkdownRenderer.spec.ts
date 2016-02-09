@@ -1,10 +1,11 @@
-import MarkdownRenderer = require('../../src/MarkdownRenderer');
-import commonmark = require('commonmark');
-import chai = require('chai');
-import compareMD = require('./compare-md');
+import MarkdownRenderer from '../../src/MarkdownRenderer';
+import * as commonmark from 'commonmark';
+import * as chai from 'chai';
+import compareMD from './compare-md';
+import {HtmlParser} from '../../src/Types';
 let expect = chai.expect;
 
-export = (description: string, htmlParser: HtmlParser) => {
+export default (description: string, htmlParser: HtmlParser) => {
 
     let oneLine = (line: string) => line.replace(/(\r\n|\n|\r)/gm, "\\n");
     let write = (root: commonmark.Node) => console.log(new commonmark.XmlRenderer().render(root));
@@ -19,7 +20,7 @@ export = (description: string, htmlParser: HtmlParser) => {
         
         // Assert
         let actualAst = parser.parse(actualMd);
-        compareMD.assertEqualTrees(parser.parse(expectedOutput), actualAst, htmlParser);
+        compareMD(parser.parse(expectedOutput), actualAst, htmlParser);
     }
 
     describe(`${description}: MarkdownRenderer`, () => {

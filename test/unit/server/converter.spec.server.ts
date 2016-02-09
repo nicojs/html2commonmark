@@ -1,4 +1,4 @@
-import describeConverterSpec = require('../describe-converter.spec');
-import JSDomParser = require('../../../src/JSDomParser');
+import describeConverterSpec from '../describe-converter.spec';
+import JSDomParser from '../../../src/JSDomParser';
 
 describeConverterSpec('From nodejs', new JSDomParser());

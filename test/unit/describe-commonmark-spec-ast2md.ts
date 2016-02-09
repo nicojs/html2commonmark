@@ -1,9 +1,10 @@
-import tests = require('./read-commonmark-tests');
-import MarkdownRenderer = require('../../src/MarkdownRenderer');
-import commonmark = require('commonmark');
-import compareMD = require('./compare-md');
+import tests from './read-commonmark-tests';
+import MarkdownRenderer from '../../src/MarkdownRenderer';
+import * as commonmark from 'commonmark';
+import compareMD from './compare-md';
+import {HtmlParser} from '../../src/Types';
 
-export = (description: string, htmlParser: HtmlParser) => {
+export default (description: string, htmlParser: HtmlParser) => {
     let sut = new MarkdownRenderer();
     let commonmarkParser = new commonmark.Parser();
     let xmlWriter = new commonmark.XmlRenderer();
@@ -24,7 +25,7 @@ export = (description: string, htmlParser: HtmlParser) => {
                 it(`test #${test.example}, section ${test.section}:\n(ast:) ${astXml}\n(md:)  ${oneLine(test.markdown)}`, () => {
                     let actualMarkdown = sut.render(ast);
                     let actualAst = commonmarkParser.parse(actualMarkdown);
-                    compareMD.assertEqualTrees(ast, actualAst, htmlParser, false);
+                    compareMD(ast, actualAst, htmlParser, false);
                 });
             });
     });

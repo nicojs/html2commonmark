@@ -1,10 +1,11 @@
-import chai = require('chai');
-let GroupingReporter = require('dom-compare').GroupingReporter;
-let compare = require('dom-compare').compare
+import * as chai from 'chai';
+import {HtmlParser} from '../../src/Types';
+let domCompare = require('dom-compare');
+let GroupingReporter = domCompare.GroupingReporter;
+let compare = domCompare.compare;
 let expect = chai.expect;
 
-
-export = (expectedHtml: string, actualHtml: string, parser: HtmlParser, logInfo?: boolean) => {
+export default (expectedHtml: string, actualHtml: string, parser: HtmlParser, logInfo?: boolean) => {
 	let expectedBody = parser.parse(expectedHtml);
 	let actualBody = parser.parse(actualHtml);
 	if(logInfo){

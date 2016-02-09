@@ -1,10 +1,11 @@
-import DomWalker = require('./DomWalker');
-import commonmark = require('commonmark');
-import Util = require('./Util');
-import DomUtil = require('./DomUtil');
-import MarkdownUtil = require('./MarkdownUtil');
+import DomWalker from './DomWalker';
+import * as commonmark from 'commonmark';
+import Util from './Util';
+import DomUtil from './DomUtil';
+import MarkdownUtil from './MarkdownUtil';
+import {Html2AstOptions, HtmlParser, WalkingStep} from './Types';
 
-class Converter {
+export default class Converter {
 
     private options: Html2AstOptions;
 
@@ -79,8 +80,7 @@ class Converter {
 
 }
 
-
-abstract class NodeConversion {
+export abstract class NodeConversion {
 
     protected children: Array<NodeConversion>;
     constructor(domWalker: DomWalker, converter: Converter) {
@@ -434,5 +434,3 @@ class RawHtmlConversion extends NodeConversion {
     }
 
 }
-
-export = Converter;

@@ -1,7 +1,7 @@
-import Converter = require('./Converter');
-import JSDomParser = require('./JSDomParser');
+import Converter from './Converter';
+import JSDomParser from './JSDomParser';
 
-export = class JSDomConverter extends Converter {
+export default class JSDomConverter extends Converter {
 
     constructor() {
         super(new JSDomParser());

@@ -1,4 +1,4 @@
-interface TestData {
+export interface TestData {
 	html: string;
 	section: string;
 	markdown: string;
@@ -7,7 +7,7 @@ interface TestData {
 	end_line: number;
 }
 
-var tests:[TestData] = [
+let tests: [TestData] = [
   {
     "html": "<pre><code>foo\tbaz\t\tbim\n</code></pre>\n",
     "section": "Tabs",
@@ -4801,4 +4801,5 @@ var tests:[TestData] = [
     "end_line": 8046
   }
 ];
-export = tests;
+
+export default tests;

@@ -1,14 +1,15 @@
-import commonmark = require('commonmark');
-import chai = require('chai');
-import compareHtml = require('./compare-html');
+import * as commonmark from 'commonmark';
+import * as chai from 'chai';
+import compareHtml from './compare-html';
+import {HtmlParser} from '../../src/Types';
 let expect = chai.expect;
 
-export function assertEqualTrees(astExpected: commonmark.Node, astActual: commonmark.Node, htmlParser: HtmlParser, logInfo?: boolean) {
+export default function assertEqualTrees(astExpected: commonmark.Node, astActual: commonmark.Node, htmlParser: HtmlParser, logInfo?: boolean) {
     astExpected = normalizeTree(astExpected);
     astActual = normalizeTree(astActual);
     let expectedWalker = astExpected.walker();
     let actualWalker = astActual.walker();
-    let expectedValue: commonmark.WalkingStep;
+    let expectedValue: commonmark.NodeWalkingStep;
 
     if (logInfo) {
         console.log('expected: ', new commonmark.XmlRenderer().render(astExpected));
@@ -34,7 +35,7 @@ export function assertEqualTrees(astExpected: commonmark.Node, astActual: common
 
     function normalizeTree(root: commonmark.Node) {
         let walker = root.walker();
-        let current: commonmark.WalkingStep;
+        let current: commonmark.NodeWalkingStep;
         while (current = walker.next()) {
             let currentNode = current.node;
             normalizeTextNodes(currentNode, walker);
@@ -83,7 +84,7 @@ export function assertEqualTrees(astExpected: commonmark.Node, astActual: common
              So normalize the content to be just one text node is fine
             */
             let text = '';
-            let current: commonmark.WalkingStep;
+            let current: commonmark.NodeWalkingStep;
             while ((current = walker.next()).node !== currentNode) {
                 if (current.entering && current.node.literal) {
                     text += current.node.literal;

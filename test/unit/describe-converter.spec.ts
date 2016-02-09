@@ -1,14 +1,15 @@
-import Converter = require('../../src/Converter');
-import commonmark = require('commonmark');
-import chai = require('chai');
+import Converter from '../../src/Converter';
+import * as commonmark from 'commonmark';
+import * as chai from 'chai';
+import {HtmlParser} from '../../src/Types';
 let expect = chai.expect;
 
-export = (description: string, htmlParser: HtmlParser) => {
+export default (description: string, htmlParser: HtmlParser) => {
 
     let write = (root: commonmark.Node) => console.log(new commonmark.XmlRenderer().render(root));
     let forAllNodes = (root: commonmark.Node, action: (node: commonmark.Node) => void) => {
         let walker = root.walker();
-        let walkStep: commonmark.WalkingStep;
+        let walkStep: commonmark.NodeWalkingStep;
         while (walkStep = walker.next()) {
             if (walkStep.entering) {
                 action(walkStep.node);
