@@ -25,8 +25,8 @@ module.exports = function (grunt) {
                     expand: true
                 }, {
                     src: ['**/*.js'],
-                    cwd: '.tmp/client/src',
-                    dest: 'dist/client',
+                    cwd: '.tmp/browser/src',
+                    dest: 'dist/browser',
                     expand: true
                 }]
             }
@@ -68,28 +68,28 @@ module.exports = function (grunt) {
             },
             src: {
                 // webpack options
-                entry: ['./.tmp/server/src/html2commonmark.client.js'],
+                entry: ['./.tmp/server/src/html2commonmark.browser.js'],
                 output: {
-                    path: '.tmp/client/src',
+                    path: '.tmp/browser/src',
                     filename: 'bundle.js',
                 },
                 module: {
                     loaders: [
                         { test: /\.json$/, loader: 'json-loader' },
-                        { test:  /html2commonmark\.client\.js$/, loader: 'expose?html2commonmark' },
+                        { test:  /html2commonmark\.browser\.js$/, loader: 'expose?html2commonmark' },
                     ]
                 }
             },
             test: {
                 // webpack options
                 entry: [
-                    './test/unit/client/html2ast.client.ts', 
-                    './test/unit/client/converter.spec.client.ts',
-                    './test/unit/client/ast2md.client.ts',
-                    './test/unit/client/MarkdownRenderer.spec.client.ts',
-                    './test/unit/client/back-and-forth.client.ts'],
+                    './test/unit/browser/html2ast.browser.ts', 
+                    './test/unit/browser/converter.spec.browser.ts',
+                    './test/unit/browser/ast2md.browser.ts',
+                    './test/unit/browser/MarkdownRenderer.spec.browser.ts',
+                    './test/unit/browser/back-and-forth.browser.ts'],
                 output: {
-                    path: '.tmp/client/test',
+                    path: '.tmp/browser/test',
                     filename: 'bundle.js',
                 },
                 resolve: {

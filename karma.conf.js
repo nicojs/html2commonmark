@@ -3,14 +3,14 @@ module.exports = function (config) {
         basePath: '.',
         files: [
             {
-                pattern: '.tmp/client/**/*.js.map',
+                pattern: '.tmp/browser/**/*.js.map',
                 included: false
             }, {
                 pattern: 'readme.md',
                 included: false  
             },
-            '.tmp/client/**/*.js',
-            'test/unit/client/**.js'
+            '.tmp/browser/**/*.js',
+            'test/unit/browser/**.js'
         ],
         frameworks: ['mocha'],
         browsers: ['Firefox'],
