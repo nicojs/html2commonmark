@@ -8,7 +8,7 @@ export default (description: string, htmlParser: HtmlParser) => {
     let write = (root: commonmark.Node) => console.log(new commonmark.XmlRenderer().render(root));
     let forAllNodes = (root: commonmark.Node, action: (node: commonmark.Node) => void) => {
         let walker = root.walker();
-        let walkStep: commonmark.WalkingStep;
+        let walkStep: commonmark.NodeWalkingStep;
         while (walkStep = walker.next()) {
             if (walkStep.entering) {
                 action(walkStep.node);

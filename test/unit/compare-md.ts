@@ -8,7 +8,7 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
     astActual = normalizeTree(astActual);
     let expectedWalker = astExpected.walker();
     let actualWalker = astActual.walker();
-    let expectedValue: commonmark.WalkingStep;
+    let expectedValue: commonmark.NodeWalkingStep;
 
     if (logInfo) {
         console.log('expected: ', new commonmark.XmlRenderer().render(astExpected));
@@ -34,7 +34,7 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
 
     function normalizeTree(root: commonmark.Node) {
         let walker = root.walker();
-        let current: commonmark.WalkingStep;
+        let current: commonmark.NodeWalkingStep;
         while (current = walker.next()) {
             let currentNode = current.node;
             normalizeTextNodes(currentNode, walker);
@@ -83,7 +83,7 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
              So normalize the content to be just one text node is fine
             */
             let text = '';
-            let current: commonmark.WalkingStep;
+            let current: commonmark.NodeWalkingStep;
             while ((current = walker.next()).node !== currentNode) {
                 if (current.entering && current.node.literal) {
                     text += current.node.literal;

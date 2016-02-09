@@ -202,7 +202,7 @@ export default class MarkdownRenderer {
     private consolidateTextNodes(root: commonmark.Node): string | boolean {
         let text = '';
         let walker = root.walker();
-        let current: commonmark.WalkingStep;
+        let current: commonmark.NodeWalkingStep;
         walker.next();
         while ((current = walker.next()) && current.node !== root) {
             if (current.entering) {
@@ -511,7 +511,7 @@ export default class MarkdownRenderer {
         this.buffer = '';
         let current: commonmark.Node;
         let walker = root.walker();
-        let step: commonmark.WalkingStep;
+        let step: commonmark.NodeWalkingStep;
         while (step = walker.next()) {
             current = step.node;
             if (!this.renderNode(current, step.entering)) {
