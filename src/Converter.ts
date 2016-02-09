@@ -3,6 +3,7 @@ import * as commonmark from 'commonmark';
 import Util from './Util';
 import DomUtil from './DomUtil';
 import MarkdownUtil from './MarkdownUtil';
+import {Html2AstOptions, HtmlParser, WalkingStep} from './Types';
 
 export default class Converter {
 

@@ -1,5 +1,6 @@
 import Util from './Util';
 import * as commonmark from 'commonmark';
+import {Ast2MarkdownOptions} from './Types';
 
 enum Escaping {
     LITERAL,

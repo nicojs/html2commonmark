@@ -2,6 +2,7 @@ import tests from './read-commonmark-tests';
 import MarkdownRenderer from '../../src/MarkdownRenderer';
 import * as commonmark from 'commonmark';
 import compareMD from './compare-md';
+import {HtmlParser} from '../../src/Types';
 
 export default (description: string, htmlParser: HtmlParser) => {
     let sut = new MarkdownRenderer();

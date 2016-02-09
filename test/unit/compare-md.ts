@@ -1,6 +1,7 @@
 import * as commonmark from 'commonmark';
 import * as chai from 'chai';
 import compareHtml from './compare-html';
+import {HtmlParser} from '../../src/Types';
 let expect = chai.expect;
 
 export default function assertEqualTrees(astExpected: commonmark.Node, astActual: commonmark.Node, htmlParser: HtmlParser, logInfo?: boolean) {

@@ -2,6 +2,7 @@ import MarkdownRenderer from '../../src/MarkdownRenderer';
 import * as commonmark from 'commonmark';
 import * as chai from 'chai';
 import compareMD from './compare-md';
+import {HtmlParser} from '../../src/Types';
 let expect = chai.expect;
 
 export default (description: string, htmlParser: HtmlParser) => {

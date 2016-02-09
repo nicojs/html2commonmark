@@ -1,6 +1,7 @@
 import Converter from '../../src/Converter';
 import * as commonmark from 'commonmark';
 import * as chai from 'chai';
+import {HtmlParser} from '../../src/Types';
 let expect = chai.expect;
 
 export default (description: string, htmlParser: HtmlParser) => {

@@ -3,6 +3,7 @@ import Renderer from '../../src/MarkdownRenderer';
 import * as commonmark from 'commonmark';
 import compareMD from './compare-md';
 import compareHtml from './compare-html';
+import {HtmlParser} from '../../src/Types';
 
 export interface InputFile {
     description: string,

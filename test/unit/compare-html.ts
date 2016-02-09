@@ -1,4 +1,5 @@
 import * as chai from 'chai';
+import {HtmlParser} from '../../src/Types';
 let domCompare = require('dom-compare');
 let GroupingReporter = domCompare.GroupingReporter;
 let compare = domCompare.compare;

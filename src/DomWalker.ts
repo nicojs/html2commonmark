@@ -1,6 +1,7 @@
 import * as jsdom from 'jsdom';
 import * as commonmark from 'commonmark';
 import DomUtil from './DomUtil';
+import {WalkingStep} from './Types';
 
 export default class DomWalker {
     current: Node;

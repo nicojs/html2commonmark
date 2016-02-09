@@ -1,3 +1,4 @@
+import {HtmlParser} from './Types';
 
 export default class BrowserParser implements HtmlParser{
     

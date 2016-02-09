@@ -3,6 +3,7 @@ import Converter from '../../src/Converter';
 import * as commonmark from 'commonmark';
 import compareMD from './compare-md';
 import compareHtml from './compare-html';
+import {HtmlParser, Html2AstOptions} from '../../src/Types';
 
 export default (description: string, htmlParser: HtmlParser) => {
     let commonmarkParser = new commonmark.Parser();
