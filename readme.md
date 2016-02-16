@@ -24,10 +24,15 @@ You can install the library using `npm`:
 
 This package includes a dependency on commonmark.js.
 
-For client-side use, you can include the `node_modules/html2commonmark/dist/client/bundle.js`
+For client-side use, you can include the `node_modules/html2commonmark/dist/browser/bundle.js`
 on your web page. It exposes the global `html2commonmark` variable.
 
 For server-side use, you can simply require it: `var html2commonmark = require('html2commonmark');`.
+
+As this npm package is writen in typescript, you can also import the module if you're using `"moduleResolution": "node"`: `import * as html2commonmark from 'html2commonmark'`.
+This will also work for the browser, but than you'll need a tool like [webpack](https://github.com/webpack/webpack) or [browserify](http://browserify.org/) 
+to package it (instead of using the bundle `node_modules/html2commonmark/dist/browser/bundle.js`)
+However: you will also need the commonmark typings in order for this to work (using tsd: `tsd install commonmark`);
 
 Usage
 -----
@@ -73,6 +78,7 @@ var spanAst = spanConverter.convert(input);
 var markdown = renderer.render(ast); // "a span of days"
 var markdownWithSpan = renderer.render(spanAst); // "a <span>span</span> of days"
 ```
+
 
 Limitations
 ----
