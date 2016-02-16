@@ -13,7 +13,7 @@ implementations in C and JavaScript. The problem
 This repository contains a JavaScript implementation for converting
 html back to markdown using the same specification. It uses the same 
 Abstract Syntax Tree (AST) as commonmark.js does (and thus has a runtime dependency on it).
-It even implements all its (599) examples as mocha unit tests to verify the conversion against the spec.
+It even implements all its (600+) examples as mocha unit tests to verify the conversion against the spec.
 Runs in the browser or on the server using nodejs.
 
 Installing

@@ -404,7 +404,11 @@ export default class MarkdownRenderer {
 
             case 'Paragraph':
                 if (!entering) {
-                    this.blankline();
+                    if (node.parent && node.parent.type === 'List' && node.parent.listTight) {
+                        this.newLine();
+                    } else {
+                        this.blankline();
+                    }
                 }
                 break;
             case 'Text':

@@ -8,6 +8,9 @@ module.exports = function (config) {
             }, {
                 pattern: 'readme.md',
                 included: false  
+            }, {
+                pattern: 'test/unit/**/*.md',
+                included: false  
             },
             '.tmp/browser/**/*.js',
             'test/unit/browser/**.js'
