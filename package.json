@@ -1,6 +1,6 @@
 {
   "name": "html2commonmark",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Convert's HTML to markdown using commonmark.js. Compliant with the commmonmark markdown specification.",
   "main": "dist/server/html2commonmark.server.js",
   "typings": "dist/server/html2commonmark.server.d.ts",
@@ -20,9 +20,9 @@
     "html"
   ],
   "author": {
-      "name": "Nico Jansen",
-      "email": "jansennico@gmail.com",
-      "url": "http://github.com/nicojs"
+    "name": "Nico Jansen",
+    "email": "jansennico@gmail.com",
+    "url": "http://github.com/nicojs"
   },
   "license": "ISC",
   "bugs": {
@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/nicojs/html2commonmark#readme",
   "files": [
-      "dist/"
+    "dist/"
   ],
   "dependencies": {
     "commonmark": "^0.24.0",
