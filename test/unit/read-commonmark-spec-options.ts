@@ -29,7 +29,7 @@ let options: OptionMap = {
     '  <div>\n\n    <div>\n': { testCompareHtmlOnly: true },
     'Foo\n<a href="bar">\nbaz\n': { testExcluded: true },
     '<table>\n\n  <tr>\n\n    <td>\n      Hi\n    </td>\n\n  </tr>\n\n</table>\n': { testCompareHtmlOnly: true },
-    '<a href="/bar\/)">\n': { rawHtmlElements: ['a'] },
+    '<a href="/bar\\/)">\n': { rawHtmlElements: ['a'] },
     '&nbsp; &amp; &copy; &AElig; &Dcaron;\n&frac34; &HilbertSpace; &DifferentialD;\n&ClockwiseContourIntegral; &ngE;\n': { testCompareHtmlOnly: true },
     '<a href="&ouml;&ouml;.html">\n': { rawHtmlElements: ['a'] },
     '<a href="`">`\n': { rawHtmlElements: ['a'] },
@@ -45,9 +45,9 @@ let options: OptionMap = {
     'foo <?php echo $a; ?>\n': { testCompareHtmlOnly: true },
     'foo <!ELEMENT br EMPTY>\n': { testCompareHtmlOnly: true },
     '<a href="&ouml;">\n': { rawHtmlElements: ['a'] },
-    '<a href="\*">\n': { rawHtmlElements: ['a'] },
+    '<a href="\\*">\n': { rawHtmlElements: ['a'] },
     '<a href="foo  \nbar">\n': { rawHtmlElements: ['a'] },
-    '<a href="foo\\nbar">\n': { rawHtmlElements: ['a'] }
+    '<a href=\"foo\\\nbar\">\n': { rawHtmlElements: ['a'] }
 };
 
 export default options;
