@@ -13,7 +13,7 @@ export default class MarkdownRenderer {
 
     private options: Ast2MarkdownOptions;
 
-    constructor(options?: Ast2MarkdownOptions) { 
+    constructor(options?: Ast2MarkdownOptions) {
         this.options = Util.assign({ preserveHardbreaks: true, preserveSoftbreaks: true }, options);
     }
 
@@ -23,9 +23,9 @@ export default class MarkdownRenderer {
     private isBeginLine: boolean;
     private isNoWrap: boolean;
     private inTightListItem: boolean;
-    
-    private lastChar() { 
-        return this.buffer.charAt(this.buffer.length - 1); 
+
+    private lastChar() {
+        return this.buffer.charAt(this.buffer.length - 1);
     }
 
     private truncatePrefix(length: number) {
@@ -181,7 +181,7 @@ export default class MarkdownRenderer {
     }
 
     private isContainer(node: commonmark.Node) {
-        return ['Document', 'BlockQuote', 'List', 'Item', 'CodeBlock', 'HtmlBlock', 'Paragraph', 'Header', 'HorizontalRule'].indexOf(node.type) >= 0;
+        return ['Document', 'BlockQuote', 'List', 'Item', 'CodeBlock', 'HtmlBlock', 'Paragraph', 'Heading', 'ThemethicalBreak'].indexOf(node.type) >= 0;
     }
 
     private getContainingBlock(node: commonmark.Node) {
@@ -326,14 +326,25 @@ export default class MarkdownRenderer {
                 }
                 break;
 
-            case 'Header':
+            case 'Heading':
+                let useSetTextHeadingUnderline = node.level < 3 && node.firstChild;
                 if (entering) {
-                    for (let i = node.level; i > 0; i--) {
-                        this.literal("#");
+                    if (!useSetTextHeadingUnderline) {
+                        for (let i = node.level; i > 0; i--) {
+                            this.literal("#");
+                        }
+                        this.literal(" ");
+                        this.isNoWrap = true;
                     }
-                    this.literal(" ");
-                    this.isNoWrap = true;
                 } else {
+                    if (useSetTextHeadingUnderline) {
+                        let headingLine = '---';
+                        if(node.level === 1){
+                            headingLine = '===';
+                        }
+                        this.newLine();
+                        this.literal(headingLine)
+                    }
                     this.isNoWrap = false;
                     this.blankline();
                 }
@@ -381,6 +392,7 @@ export default class MarkdownRenderer {
                 this.blankline();
                 break;
 
+            case 'ThematicBreak':
             case 'HorizontalRule':
                 this.blankline();
                 this.literal("-----");
@@ -430,6 +442,7 @@ export default class MarkdownRenderer {
                 break;
 
             case 'Html':
+            case 'HtmlInline':
                 this.out(node.literal, false, Escaping.LITERAL);
                 break;
 

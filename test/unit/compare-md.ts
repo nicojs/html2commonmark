@@ -49,10 +49,13 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
         if (currentNode.type === 'Text' && currentNode.next && currentNode.next.type === 'Text') {
             mergeNodes('Text', currentNode, currentNode.next, walker);
         }
+        if(currentNode.type === 'Text' && !currentNode.literal){
+            removeCurrentNode(currentNode, walker);
+        }
     }
 
     function isHtml(node: commonmark.Node) {
-        return node && (node.type === 'Html' || node.type === 'HtmlBlock');
+        return node && (node.type === 'Html' || node.type === 'HtmlBlock' || node.type === 'HtmlInline');
     }
 
     function normalizeHtmlNodes(currentNode: commonmark.Node, walker: commonmark.NodeWalker) {
@@ -73,8 +76,17 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
         a.unlink();
         walker.resumeAt(newNode);
     }
-
-
+    
+    function removeCurrentNode(nodeToRemove: commonmark.Node, walker: commonmark.NodeWalker){
+        let next = nodeToRemove.next, isEntering = true;
+        if(!next){
+            next = nodeToRemove.parent;
+            isEntering = false;
+        }
+        nodeToRemove.unlink();
+        walker.resumeAt(next, isEntering);
+    }
+    
     function normalizeImageNodes(currentNode: commonmark.Node, walker: commonmark.NodeWalker) {
         if (currentNode.type === 'Image') {
             /* 
@@ -100,7 +112,7 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
     }
 
     function assertLiteral(expecedValue: commonmark.Node, actualValue: commonmark.Node) {
-        if (expecedValue.type === 'HtmlBlock' || expecedValue.type === 'Html') {
+        if (isHtml(expecedValue)) {
             // Compare the dom
             compareHtml(expecedValue.literal, actualValue.literal, htmlParser);
         } else {
@@ -111,7 +123,7 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
     function assertType(expecedValue: commonmark.Node, actualValue: commonmark.Node) {
         if (isHtml(expecedValue)) {
             // Html blocks section Rule 7. The information about new lines between tags gets lost during parsing
-            expect(isHtml(actualValue), `Comparing 'type' property was '${actualValue.type}' instead of 'Html' or 'HtmlBlock'`).
+            expect(isHtml(actualValue), `Comparing 'type' property was '${actualValue.type}' instead of 'HtmlInline' or 'HtmlBlock'`).
                 to.be.equal(true);
         } else {
             expect(actualValue.type, 'Comparing type property').to.be.equal(expecedValue.type);

@@ -12,7 +12,7 @@ export default (description: string, htmlParser: HtmlParser) => {
     var oneLine = (line: string) => line.replace(/(\r\n|\n|\r)/gm, "\\n");
 
     describe(description, () => {
-
+        
         tests.forEach(test => {
             let options = testOptions[test.markdown] || {};
             if (!options.testExcluded) {

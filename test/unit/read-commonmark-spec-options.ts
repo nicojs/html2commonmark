@@ -46,6 +46,9 @@ let options: OptionMap = {
     'foo <!ELEMENT br EMPTY>\n': { testCompareHtmlOnly: true },
     '<a href="&ouml;">\n': { rawHtmlElements: ['a'] },
     '<a href="\\*">\n': { rawHtmlElements: ['a'] },
+    'foo <a href="\\*">\n': { rawHtmlElements: ['a'] },
+    'foo <a href="&ouml;">\n': { rawHtmlElements: ['a'] },
+    '</a></foo >\n': { testCompareHtmlOnly: true },
     '<a href="foo  \nbar">\n': { rawHtmlElements: ['a'] },
     '<a href=\"foo\\\nbar\">\n': { rawHtmlElements: ['a'] }
 };
