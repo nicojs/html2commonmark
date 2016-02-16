@@ -292,7 +292,10 @@ export default class MarkdownRenderer {
                 if (node.parent.listType === 'Bullet') {
                     markerWidth = 2;
                 } else {
-                    let listNumber = node.parent.listStart || 1;
+                    let listNumber = node.parent.listStart;
+                    if (typeof node.parent.listStart !== 'number') {
+                        listNumber = 1;
+                    }
                     let listDelimiter = node.parent.listDelimiter;
                     let tmp = node;
                     while (tmp.prev) {
@@ -339,7 +342,7 @@ export default class MarkdownRenderer {
                 } else {
                     if (useSetTextHeadingUnderline) {
                         let headingLine = '---';
-                        if(node.level === 1){
+                        if (node.level === 1) {
                             headingLine = '===';
                         }
                         this.newLine();

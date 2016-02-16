@@ -4,7 +4,11 @@ import compareHtml from './compare-html';
 import {HtmlParser} from '../../src/Types';
 let expect = chai.expect;
 
-export default function assertEqualTrees(astExpected: commonmark.Node, astActual: commonmark.Node, htmlParser: HtmlParser, logInfo?: boolean) {
+export interface CompareOptions {
+    ignoreListTightness?: boolean;
+}
+
+export default function assertEqualTrees(astExpected: commonmark.Node, astActual: commonmark.Node, htmlParser: HtmlParser, options: CompareOptions = {}, logInfo?: boolean) {
     astExpected = normalizeTree(astExpected);
     astActual = normalizeTree(astActual);
     let expectedWalker = astExpected.walker();
@@ -25,12 +29,20 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
         assertInfo(expectedValue.node, actualValue.node);
         expect(actualValue).to.be.ok;
         ['level', 'title', 'destination'].forEach
-            (prop => expect(actualValue.node[prop], `comparing ${prop} of ${expectedValue.node.type}`).to.be.equal(expectedValue.node[prop]));
+            (prop => verifyNodePropertyEquality(expectedValue.node, actualValue.node, prop));
 
-        if (expectedValue.node.type === 'list') {
-            ['listTight', 'listTight', 'listStart', 'listDilimiter'].forEach(prop => expect(actualValue.node[prop]).to.be.equal(expectedValue.node[prop]));
+        if (expectedValue.node.type === 'List') {
+            let listAttributes = ['listStart'];
+            if (!options.ignoreListTightness) {
+                listAttributes.push('listTight');
+            }
+            listAttributes.forEach(prop => verifyNodePropertyEquality(expectedValue.node, actualValue.node, prop));
         }
         expect(actualValue.entering).to.be.equal(expectedValue.entering);
+    }
+
+    function verifyNodePropertyEquality(expected: commonmark.Node, actual: commonmark.Node, propertyName) {
+        expect(actual[propertyName], `comparing "${propertyName}" of ${expected.type}`).to.be.equal(expected[propertyName]);
     }
 
     function normalizeTree(root: commonmark.Node) {
@@ -49,7 +61,7 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
         if (currentNode.type === 'Text' && currentNode.next && currentNode.next.type === 'Text') {
             mergeNodes('Text', currentNode, currentNode.next, walker);
         }
-        if(currentNode.type === 'Text' && !currentNode.literal){
+        if (currentNode.type === 'Text' && !currentNode.literal) {
             removeCurrentNode(currentNode, walker);
         }
     }
@@ -76,17 +88,17 @@ export default function assertEqualTrees(astExpected: commonmark.Node, astActual
         a.unlink();
         walker.resumeAt(newNode);
     }
-    
-    function removeCurrentNode(nodeToRemove: commonmark.Node, walker: commonmark.NodeWalker){
+
+    function removeCurrentNode(nodeToRemove: commonmark.Node, walker: commonmark.NodeWalker) {
         let next = nodeToRemove.next, isEntering = true;
-        if(!next){
+        if (!next) {
             next = nodeToRemove.parent;
             isEntering = false;
         }
         nodeToRemove.unlink();
         walker.resumeAt(next, isEntering);
     }
-    
+
     function normalizeImageNodes(currentNode: commonmark.Node, walker: commonmark.NodeWalker) {
         if (currentNode.type === 'Image') {
             /* 
