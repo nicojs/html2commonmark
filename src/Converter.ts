@@ -139,21 +139,36 @@ class ContainerBlockConversion extends NamedContainerConversion {
             }
         }
         
-        // If we have children and some children are inline, we incapsulate those in a paragraph conversion 
+        // See http://spec.commonmark.org/0.24/#loose
+        // A list is loose if any of its constituent list items are separated by blank lines, 
+        // or if any of its constituent list items directly contain two block-level elements with a blank line between them. Otherwise a list is tight.
+        // (The difference in HTML output is that paragraphs in a loose list are wrapped in <p> tags, while paragraphs in a tight list are not.)
+        let listIsTight = true;
+        
+        // If we have children and some children are inline, we incapsulate those in a paragraph 
         if (containerBlockNode.firstChild) {
             let child = containerBlockNode.firstChild;
             let inlineNodes: Array<commonmark.Node> = [];
             while (child) {
+                if(child.type === 'Paragraph'){
+                    // Tightness of lists are best-efford. If we parsed a p-tag, than at was probably a loose list
+                    listIsTight = false;
+                }
                 if (MarkdownUtil.isInline(child)) {
                     inlineNodes.push(child);
                 } else {
-                   wrapInlineNodes(inlineNodes);
-                   inlineNodes = [];
+                    wrapInlineNodes(inlineNodes);
+                    inlineNodes = [];
                 }
                 child = child.next;
             }
             wrapInlineNodes(inlineNodes);
         }
+        
+        if (containerBlockNode.parent && containerBlockNode.parent.type === 'List') {
+            containerBlockNode.parent.listTight = listIsTight;
+        }
+        
         return containerBlockNode;
     }
 }
@@ -313,14 +328,16 @@ class ListConversion extends NamedContainerConversion {
 
     public execute(container: commonmark.Node) {
         let list = super.execute(container);
-        list._listData = {};
         let start = this.listTag.attributes.getNamedItem('start');
         switch (this.listTag.nodeName.toLowerCase()) {
             case 'ul':
                 list.listType = 'Bullet';
+                list.listStart = null;
                 break;
             case 'ol':
                 list.listType = 'Ordered';
+                list.listDelimiter = '.'; // we have to choose one
+                list.listStart = 1;
                 if (start && start.value) {
                     list.listStart = parseInt(start.value);
                 }
