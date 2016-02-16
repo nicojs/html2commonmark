@@ -23,4 +23,4 @@ let retrieveFromServer: (url: string) => Promise<string> = (url: string) => {
 };
 
 
-describeBackAndForth('From browser', new BrowserParser(), [{ description: 'readme.md', content: retrieveFromServer('base/readme.md') }]);
+describeBackAndForth('From browser', new BrowserParser(), (url: string) => retrieveFromServer('base/' + url));
