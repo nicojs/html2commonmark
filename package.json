@@ -33,7 +33,7 @@
       "dist/"
   ],
   "dependencies": {
-    "commonmark": "^0.22.1",
+    "commonmark": "^0.24.0",
     "jsdom": "^7.1.0"
   },
   "devDependencies": {

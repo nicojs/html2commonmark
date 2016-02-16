@@ -56,7 +56,7 @@ export default class Converter {
             case 'p':
                 return new NamedContainerConversion(walker, this, 'Paragraph');
             case 'hr':
-                return new NamedContainerConversion(walker, this, 'HorizontalRule');
+                return new NamedContainerConversion(walker, this, 'ThematicBreak');
             case '#text':
                 return new TextConversion(walker, this, domNode);
             case 'blockquote':
@@ -183,7 +183,7 @@ class LinkConversion extends NamedContainerConversion {
 
 class HeaderConversion extends NamedContainerConversion {
     public constructor(domWalker: DomWalker, converter: Converter, private level: number) {
-        super(domWalker, converter, 'Header');
+        super(domWalker, converter, 'Heading');
     }
 
     public execute(container: commonmark.Node) {
