@@ -40,7 +40,12 @@ export default class Converter {
             case 'a':
                 return new LinkConversion(walker, this, domNode);
             case 'br':
-                return new NamedContainerConversion(walker, this, 'Hardbreak');
+                // Issue #15: A Hardbreak is only allowed when there is an inline sibling
+                if(domNode.nextSibling && DomUtil.isInline(domNode.nextSibling)){
+                    return new NamedContainerConversion(walker, this, 'Hardbreak');
+                }else{
+                    return new NoopConversion(walker, this);
+                }
             case 'body': case 'custom-root':
                 return new NoopConversion(walker, this);
             case 'pre':
