@@ -108,6 +108,24 @@ export default (description: string, htmlParser: HtmlParser) => {
                 expect(actualAst.firstChild.firstChild).to.be.not.ok;
                 expect(actualAst.firstChild.literal).to.be.eq('someCode');
             });
+            
+            it('should not convert a trailing br-tag', () => {
+                let actualAstTrailingBRTag = sut.convert('<p>some text<br/></p>');
+                let actualAstTrailingBRTag2 = sut.convert('<some-element><br/></some-element>');
+                let actualBrTagInCenter = sut.convert('<p>some <br/> text</p>');
+                
+                expect(actualAstTrailingBRTag.firstChild.type).to.be.eq('Paragraph');
+                expect(actualAstTrailingBRTag.firstChild.firstChild.literal).to.be.eq('some text');
+                expect(actualAstTrailingBRTag.firstChild.firstChild.next).to.not.be.ok;
+                
+                expect(actualAstTrailingBRTag2.firstChild.type).to.be.eq('HtmlBlock');
+                expect(actualAstTrailingBRTag2.firstChild.firstChild).to.not.be.ok;
+                
+                expect(actualBrTagInCenter.firstChild.type).to.be.eq('Paragraph');
+                expect(actualBrTagInCenter.firstChild.firstChild.literal).to.be.eq('some');
+                expect(actualBrTagInCenter.firstChild.firstChild.next.type).to.be.eq('Hardbreak');
+                expect(actualBrTagInCenter.firstChild.firstChild.next.next.literal).to.be.eq('text');
+            });
         });
     });
 };
