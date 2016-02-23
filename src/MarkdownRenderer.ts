@@ -356,21 +356,21 @@ export default class MarkdownRenderer {
             case 'CodeBlock':
                 this.blankline();
                 let info = node.info || '';
-                let code = node.literal;
+                let codeLiteral = node.literal || '';
 
                 // use indented form if no info, and code doesn't
                 // begin or end with a blank line, and code isn't
                 // first thing in a list item
                 if (!info.length &&
-                    (code.length > 2 && !Util.isSpace(code[0])) &&
-                    !(Util.isSpace(code[code.length - 1]) && Util.isSpace(code[code.length - 2])) &&
+                    (codeLiteral.length > 2 && !Util.isSpace(codeLiteral[0])) &&
+                    !(Util.isSpace(codeLiteral[codeLiteral.length - 1]) && Util.isSpace(codeLiteral[codeLiteral.length - 2])) &&
                     !(!node.prev && node.parent && node.parent.type == 'Item')) {
                     this.literal("    ");
                     this.prefix += "    ";
-                    this.out(code, false, Escaping.LITERAL);
+                    this.out(codeLiteral, false, Escaping.LITERAL);
                     this.truncatePrefix(4);
                 } else {
-                    let numticks = this.longestBacktickSequence(code) + 1;
+                    let numticks = this.longestBacktickSequence(codeLiteral) + 1;
                     if (numticks < 3) {
                         numticks = 3;
                     }
@@ -380,7 +380,7 @@ export default class MarkdownRenderer {
                     this.literal(" ");
                     this.out(info, false, Escaping.LITERAL);
                     this.newLine();
-                    this.literal(node.literal);
+                    this.literal(codeLiteral);
                     this.newLine();
                     for (let i = 0; i < numticks; i++) {
                         this.literal("`");
@@ -431,16 +431,16 @@ export default class MarkdownRenderer {
                 break;
 
             case 'Code':
-                code = node.literal;
-                let numticks = this.shorterstUnusedBacktickSequence(code);
+                codeLiteral = node.literal;
+                let numticks = this.shorterstUnusedBacktickSequence(codeLiteral);
                 for (let i = 0; i < numticks; i++) {
                     this.literal("`");
                 }
-                if (code.length == 0 || code[0] == '`') {
+                if (codeLiteral.length == 0 || codeLiteral[0] == '`') {
                     this.literal(" ");
                 }
-                this.out(code, true, Escaping.LITERAL);
-                if (code.length == 0 || code[code.length - 1] == '`') {
+                this.out(codeLiteral, true, Escaping.LITERAL);
+                if (codeLiteral.length == 0 || codeLiteral[codeLiteral.length - 1] == '`') {
                     this.literal(" ");
                 }
                 for (let i = 0; i < numticks; i++) {

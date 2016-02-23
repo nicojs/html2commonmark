@@ -57,5 +57,26 @@ export default (description: string, htmlParser: HtmlParser) => {
                 arrangeActAssert(sut, markdownWithHardbreak, 'some text with\\\nhardbreak');
             });
         });
+        
+        describe('using default config', () =>{
+           
+           let sut: MarkdownRenderer;
+           
+           before(() => {
+               sut = new MarkdownRenderer();
+           });
+           
+           it('should not break when an empty CodeBlock occurs', () => {
+               // Issue #14 https://github.com/nicojs/html2commonmark/issues/14
+               let result = sut.render(createDocument(new commonmark.Node('CodeBlock')));
+               expect(result).to.be.eq('``` \n```\n'); // Should look different, but for now its ok
+           });
+        });
     });
+    
+    function createDocument(node: commonmark.Node): commonmark.Node {
+        let document = new commonmark.Node('Document');
+        document.appendChild(node);
+        return document;
+    }
 };
