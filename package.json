@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/nicojs/html2commonmark/issues"
   },
-  "homepage": "https://github.com/nicojs/html2commonmark#readme",
+  "homepage": "https://nicojs.github.io/html2commonmark",
   "files": [
     "dist/"
   ],
