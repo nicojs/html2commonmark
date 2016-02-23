@@ -79,8 +79,8 @@
 	var BrowserParser_1 = __webpack_require__(29);
 	var BrowserConverter = (function (_super) {
 	    __extends(BrowserConverter, _super);
-	    function BrowserConverter() {
-	        _super.call(this, new BrowserParser_1.default());
+	    function BrowserConverter(options) {
+	        _super.call(this, new BrowserParser_1.default(), options);
 	    }
 	    return BrowserConverter;
 	})(Converter_1.default);
