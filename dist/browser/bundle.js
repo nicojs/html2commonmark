@@ -116,7 +116,8 @@
 	        var htmlElement = this.parser.parse(html);
 	        var walker = new DomWalker_1.default(htmlElement);
 	        var document = new commonmark.Node('Document');
-	        var conversion = this.createConversion(walker.next().domNode, walker).execute(document);
+	        var conversion = this.createConversion(walker.next().domNode, walker);
+	        conversion.execute(document);
 	        return document;
 	    };
 	    Converter.prototype.createConversion = function (domNode, walker) {
@@ -136,9 +137,9 @@
 	            case 'custom-root':
 	                return new NoopConversion(walker, this);
 	            case 'pre':
-	                return new NamedContainerConversion(walker, this, 'CodeBlock');
+	                return new NamedContainerConversion(walker, this, 'CodeBlock', '');
 	            case 'code':
-	                return new CodeBlockConversion(walker, this, domNode);
+	                return new CodeConversion(walker, this, domNode);
 	            case 'img':
 	                return new ImageConversion(walker, this, domNode);
 	            case 'ul':
@@ -304,8 +305,8 @@
 	})(NamedContainerConversion);
 	var InlineConversion = (function (_super) {
 	    __extends(InlineConversion, _super);
-	    function InlineConversion(domWalker, converter, nodeName) {
-	        _super.call(this, domWalker, converter, nodeName);
+	    function InlineConversion(domWalker, converter, nodeName, literal) {
+	        _super.call(this, domWalker, converter, nodeName, literal);
 	    }
 	    return InlineConversion;
 	})(NamedContainerConversion);
@@ -317,7 +318,7 @@
 	    }
 	    TextConversion.prototype.execute = function (container) {
 	        var textContent = this.trimTextContent();
-	        if (this.hasParent('pre')) {
+	        if (container.type === 'Code' || container.type === 'CodeBlock') {
 	            container.literal = this.textNode.textContent;
 	            return null;
 	        }
@@ -335,15 +336,6 @@
 	            });
 	            return container.firstChild;
 	        }
-	    };
-	    TextConversion.prototype.hasParent = function (type) {
-	        var parent = this.textNode;
-	        while (parent = parent.parentNode) {
-	            if (parent.nodeName.toLowerCase() === 'code') {
-	                return true;
-	            }
-	        }
-	        return false;
 	    };
 	    TextConversion.prototype.trimTextContent = function () {
 	        var text = this.textNode.textContent;
@@ -440,35 +432,25 @@
 	    }
 	    return ListItemConversion;
 	})(ContainerBlockConversion);
-	var CodeBlockConversion = (function (_super) {
-	    __extends(CodeBlockConversion, _super);
-	    function CodeBlockConversion(domWalker, converter, codeTag) {
-	        _super.call(this, domWalker, converter);
+	var CodeConversion = (function (_super) {
+	    __extends(CodeConversion, _super);
+	    function CodeConversion(domWalker, converter, codeTag) {
+	        _super.call(this, domWalker, converter, 'Code', '');
 	        this.codeTag = codeTag;
 	    }
-	    CodeBlockConversion.prototype.isInline = function () {
-	        return false;
-	    };
-	    CodeBlockConversion.prototype.execute = function (container) {
-	        var codeBlock = null;
+	    CodeConversion.prototype.execute = function (container) {
 	        if (container.type === 'CodeBlock') {
-	            this.enrichCodeBlock(this.codeTag, container);
+	            this.children.forEach(function (c) { return c.execute(container); });
+	            this.enrichCodeBlock(container);
+	            return null;
 	        }
 	        else {
-	            codeBlock = new commonmark.Node('Code');
-	            container.appendChild(codeBlock);
-	            codeBlock.literal = '';
-	            this.enrichCodeBlock(this.codeTag, codeBlock);
+	            var codeNode = _super.prototype.execute.call(this, container);
 	        }
-	        var parent = codeBlock;
-	        if (!parent) {
-	            parent = container;
-	        }
-	        this.children.forEach(function (c) { return c.execute(parent); });
-	        return codeBlock;
 	    };
-	    CodeBlockConversion.prototype.enrichCodeBlock = function (codeTag, codeBlock) {
-	        if (codeBlock.type === 'CodeBlock' && DomUtil_1.default.isElement(codeTag)) {
+	    CodeConversion.prototype.enrichCodeBlock = function (codeBlock) {
+	        var codeTag = this.codeTag;
+	        if (DomUtil_1.default.isElement(codeTag)) {
 	            var classes = codeTag.classList;
 	            var info = null;
 	            for (var i = 0; i < classes.length; i++) {
@@ -478,11 +460,10 @@
 	                }
 	            }
 	            codeBlock.info = info;
-	            codeBlock.literal = '';
 	        }
 	    };
-	    return CodeBlockConversion;
-	})(NodeConversion);
+	    return CodeConversion;
+	})(InlineConversion);
 	var RawHtmlConversion = (function (_super) {
 	    __extends(RawHtmlConversion, _super);
 	    function RawHtmlConversion(domWalker, converter, rawHtmlNode) {
