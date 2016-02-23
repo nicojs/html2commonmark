@@ -1,6 +1,6 @@
 {
   "name": "html2commonmark",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Convert's HTML to markdown using commonmark.js. Compliant with the commmonmark markdown specification.",
   "main": "dist/server/html2commonmark.server.js",
   "typings": "dist/server/html2commonmark.server.d.ts",
