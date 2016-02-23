@@ -22,7 +22,8 @@ export default class Converter {
         let htmlElement = this.parser.parse(html);
         let walker = new DomWalker(htmlElement);
         let document = new commonmark.Node('Document');
-        let conversion = this.createConversion(walker.next().domNode, walker).execute(document);
+        let conversion = this.createConversion(walker.next().domNode, walker);
+        conversion.execute(document);
         return document;
     }
 
@@ -43,9 +44,9 @@ export default class Converter {
             case 'body': case 'custom-root':
                 return new NoopConversion(walker, this);
             case 'pre':
-                return new NamedContainerConversion(walker, this, 'CodeBlock');
+                return new NamedContainerConversion(walker, this, 'CodeBlock', '');
             case 'code':
-                return new CodeBlockConversion(walker, this, domNode);
+                return new CodeConversion(walker, this, domNode);
             case 'img':
                 return new ImageConversion(walker, this, domNode);
             case 'ul':
@@ -150,7 +151,7 @@ class ContainerBlockConversion extends NamedContainerConversion {
             let child = containerBlockNode.firstChild;
             let inlineNodes: Array<commonmark.Node> = [];
             while (child) {
-                if(child.type === 'Paragraph'){
+                if (child.type === 'Paragraph') {
                     // Tightness of lists are best-efford. If we parsed a p-tag, than at was probably a loose list
                     listIsTight = false;
                 }
@@ -164,11 +165,11 @@ class ContainerBlockConversion extends NamedContainerConversion {
             }
             wrapInlineNodes(inlineNodes);
         }
-        
+
         if (containerBlockNode.parent && containerBlockNode.parent.type === 'List') {
             containerBlockNode.parent.listTight = listIsTight;
         }
-        
+
         return containerBlockNode;
     }
 }
@@ -210,8 +211,8 @@ class HeaderConversion extends NamedContainerConversion {
 
 class InlineConversion extends NamedContainerConversion {
 
-    public constructor(domWalker: DomWalker, converter: Converter, nodeName: string) {
-        super(domWalker, converter, nodeName);
+    public constructor(domWalker: DomWalker, converter: Converter, nodeName: string, literal?: string) {
+        super(domWalker, converter, nodeName, literal);
     }
 }
 
@@ -228,7 +229,7 @@ class TextConversion extends NodeConversion {
     public execute(container: commonmark.Node) {
 
         let textContent = this.trimTextContent();
-        if (this.hasParent('pre')) {
+        if (container.type === 'Code' || container.type === 'CodeBlock') {
             container.literal = this.textNode.textContent;
             return null;
         } else if (textContent) {
@@ -245,16 +246,6 @@ class TextConversion extends NodeConversion {
             });
             return container.firstChild;
         }
-    }
-
-    private hasParent(type: string) {
-        var parent = this.textNode;
-        while (parent = parent.parentNode) {
-            if (parent.nodeName.toLowerCase() === 'code') {
-                return true;
-            }
-        }
-        return false;
     }
 
     private trimTextContent(): string {
@@ -353,36 +344,27 @@ class ListItemConversion extends ContainerBlockConversion {
     }
 }
 
-class CodeBlockConversion extends NodeConversion {
+class CodeConversion extends InlineConversion {
 
     constructor(domWalker: DomWalker, converter: Converter, private codeTag: Node) {
-        super(domWalker, converter);
-    }
-
-    public isInline() {
-        return false;
+        super(domWalker, converter, 'Code', '');
     }
 
     public execute(container: commonmark.Node) {
-        let codeBlock: commonmark.Node = null;
         if (container.type === 'CodeBlock') {
-            this.enrichCodeBlock(this.codeTag, container);
+            // We are part of a larger code block, just let the text nodes be added to that codeblock
+            this.children.forEach(c => c.execute(container));
+            this.enrichCodeBlock(container);
+            return null;
         } else {
-            codeBlock = new commonmark.Node('Code');
-            container.appendChild(codeBlock);
-            codeBlock.literal = ''; // Initialize to an empty string.
-            this.enrichCodeBlock(this.codeTag, codeBlock);
+            // Default implementation is good enought. Text nodes will be added to new 'Code' node.
+            var codeNode = super.execute(container);
         }
-        let parent = codeBlock;
-        if (!parent) {
-            parent = container;
-        }
-        this.children.forEach(c => c.execute(parent));
-        return codeBlock;
     }
 
-    private enrichCodeBlock(codeTag: Node, codeBlock: commonmark.Node) {
-        if (codeBlock.type === 'CodeBlock' && DomUtil.isElement(codeTag)) {
+    private enrichCodeBlock(codeBlock: commonmark.Node) {
+        let codeTag = this.codeTag;
+        if (DomUtil.isElement(codeTag)) {
             let classes = codeTag.classList;
             let info = null;
             for (let i = 0; i < classes.length; i++) {
@@ -392,7 +374,6 @@ class CodeBlockConversion extends NodeConversion {
                 }
             }
             codeBlock.info = info;
-            codeBlock.literal = ''; // initialize with empty string, even if there are no childnodes.
         }
     }
 }

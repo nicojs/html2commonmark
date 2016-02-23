@@ -101,7 +101,13 @@ export default (description: string, htmlParser: HtmlParser) => {
                 });
                 expect(numberOfParagraphs, `Created ${numberOfParagraphs} paragraphs for inline content where 1 paragraph was expected. Abstract syntax tree is: ${new commonmark.XmlRenderer().render(actualAst)}`).to.be.eq(1);
             });
-
+            
+            it('should handle a lonely pre-tag as a CodeBlock node', () =>{
+                let actualAst = sut.convert('<pre>someCode</pre>');
+                expect(actualAst.firstChild.type).to.be.eq('CodeBlock');
+                expect(actualAst.firstChild.firstChild).to.be.not.ok;
+                expect(actualAst.firstChild.literal).to.be.eq('someCode');
+            });
         });
     });
 };

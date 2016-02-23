@@ -12,10 +12,10 @@ export default (description: string, htmlParser: HtmlParser) => {
     var oneLine = (line: string) => line.replace(/(\r\n|\n|\r)/gm, "\\n");
 
     describe(description, () => {
-       
+
         tests.forEach(test => {
-            let options = testOptions[test.markdown] || {}; 
-            if (!options.testExcluded) { 
+            let options = testOptions[test.markdown] || {};
+            if (!options.testExcluded) {
                 it(`test #${test.example}, section ${test.section}:\n(html:) ${oneLine(test.html)}\n(md:)   ${oneLine(test.markdown)}${options.testCompareHtmlOnly ? '\n(html:) ' + oneLine(test.html) : ''}`, () => {
                     let sut = new Converter(htmlParser, options);
                     let actualAst = sut.convert(test.html);
@@ -23,9 +23,9 @@ export default (description: string, htmlParser: HtmlParser) => {
                     if (options.testCompareHtmlOnly) {
                         let expectedHtml = htmlWriter.render(expectedAst);
                         let actualHtml = htmlWriter.render(actualAst);
-                        compareHtml(expectedHtml, actualHtml, htmlParser);
+                        compareHtml(expectedHtml, actualHtml, htmlParser, false);
                     } else {
-                        compareMD(expectedAst, actualAst, htmlParser, true);
+                        compareMD(expectedAst, actualAst, htmlParser, {}, false);
                     }
                 });
             }
