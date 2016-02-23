@@ -86,6 +86,7 @@ module.exports = function (grunt) {
                     './test/unit/browser/html2ast.browser.ts', 
                     './test/unit/browser/converter.spec.browser.ts',
                     './test/unit/browser/ast2md.browser.ts',
+                    './test/unit/browser/BowserConverter.spec.ts',
                     './test/unit/browser/MarkdownRenderer.spec.browser.ts',
                     './test/unit/browser/back-and-forth.browser.ts'],
                 output: {
