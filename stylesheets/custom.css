@@ -1,0 +1,60 @@
+.col{
+    width: 50%;
+    float: left;
+}
+.row{
+    width: 100%;
+    overflow: hidden;
+}
+.demo{
+    overflow: hidden;
+}
+.demo textarea{
+    width: 100%;
+}
+
+.readonly{
+    background-color: #FAFAFA;
+}
+
+.high{
+    height: 500px;
+}
+
+.medium{
+    height: 150px;
+}
+
+.editor{
+    border-image-source: initial;
+    border-image-slice: initial;
+    border-image-width: initial;
+    border-image-outset: initial;
+    border-image-repeat: initial;
+    -webkit-rtl-ordering: logical;
+    -webkit-user-select: text;
+    flex-direction: column;
+    resize: auto;
+    cursor: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 1px solid;
+    padding: 2px;
+}
+
+#presentation-editor{
+    line-height: 10px;
+}
+
+.forkme_button {
+  display: block;
+  z-index: 10;
+  padding: 10px 50px 10px 10px;
+  width: 150px;
+  color: #fff;
+  background: url('../images/blacktocat.png') #0090ff no-repeat 95% 50%;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(0,0,0,.5);
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
