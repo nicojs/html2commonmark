@@ -16,6 +16,10 @@ Abstract Syntax Tree (AST) as commonmark.js does (and thus has a runtime depende
 It even implements all its (600+) examples as mocha unit tests to verify the conversion against the spec.
 Runs in the browser or on the server using nodejs.
 
+Live demo
+-----------
+See a live demo at https://nicojs.github.io/html2commonmark
+
 Installing
 -----------
 You can install the library using `npm`:
